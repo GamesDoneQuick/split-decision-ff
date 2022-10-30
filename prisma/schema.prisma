@@ -111,6 +111,7 @@ model GameSubmission {
   technicalNotes String?
   contentWarning String?
   flashingLights Boolean                  @default(false)
+  soloCommentary Boolean                  @default(false)
   user           User                     @relation(fields: [userId], references: [id])
   categories     GameSubmissionCategory[]
   event          Event                    @relation(fields: [eventId], references: [id])

@@ -69,6 +69,10 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
     setSubmissionField('flashingLights', value);
   }, [setSubmissionField]);
 
+  const handleUpdateSoloCommentary = useCallback((value: boolean) => {
+    setSubmissionField('soloCommentary', value);
+  }, [setSubmissionField]);
+
   const handleCategoryUpdate = useCallback((value: GameSubmissionCategory, index: number) => {
     setSubmissionField('categories', validatedSubmission.value.categories.reduce<GameSubmissionCategory[]>((acc, category, idx) => [
       ...acc,
@@ -220,6 +224,34 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
           helpText={`Technical notes are not shown on the public submission list, and are only used by the ${SiteConfig.organizationName} production team.`}
         />
       </FormItem>
+      <Separator />
+      <Instructions>Commentary</Instructions>
+      <CommentaryInstructions>
+        Runs in Frame Fatales events must use one of these three commentary options:
+
+        <ol>
+          <li>Inviting one or more commentators eligible for Frame Fatales server membership</li>
+          <li>A Commentary Buddy volunteer who assists you in commentating</li>
+          <li>Solo commentary</li>
+        </ol>
+
+        If you plan to use option 3 (Solo Commentary) if this submission is accepted, enable the toggle below.
+        By doing so, you recognize that the Frame Fatales Games Committee will more heavily consider the quality
+        of the commentary in your submission video when deciding whether or not to include your run.
+      </CommentaryInstructions>
+      <CommentaryInstructions>
+        If you do not enable this toggle, you are expected to provide commentators for your run or request a
+        Commentary Buddy. If your desired commentators are unavailable, the Frame Fatales event staff will pair
+        you with a Commentary Buddy.
+      </CommentaryInstructions>
+      <FormItem>
+        <ToggleSwitch
+          toggled={validatedSubmission.value.soloCommentary}
+          onChange={handleUpdateSoloCommentary}
+        >
+          I plan to solo commentate this run.
+        </ToggleSwitch>
+      </FormItem>
       <CategoryList>
         <Instructions>Categories ({validatedSubmission.value.categories.length})</Instructions>
         {validatedSubmission.value.categories.map((category, index) => (
@@ -277,4 +309,18 @@ const DeleteSubmissionButton = styled(Button)`
   margin-left: auto;
   font-size: 1.25rem;
   margin: 0;
+`;
+
+const Separator = styled.div`
+  display: block; 
+  width: 100%;
+  height: 1px;
+  background-color: ${SiteConfig.colors.accents.separator};
+  margin: 0.5rem 0;
+`;
+
+const CommentaryInstructions = styled.p`
+  line-height: 1.2;
+  font-size: 1rem;
+  margin-top: 0;
 `;

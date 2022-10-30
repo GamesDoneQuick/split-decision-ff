@@ -94,7 +94,7 @@ const InputError = styled.p`
   font-size: 1rem;
 `;
 
-const HelpText = styled.p`
+export const HelpText = styled.p`
   margin: 0.5rem 0 0;
   color: ${SiteConfig.colors.text.light};
   font-style: italic;
@@ -278,13 +278,19 @@ export const AlertElement = styled.div`
     background-color: ${SiteConfig.colors.error.background};
     color: ${SiteConfig.colors.error.text};
   }
+
+  &.warning {
+    background-color: ${SiteConfig.colors.warning.background};
+    color: ${SiteConfig.colors.warning.text};
+  }
 `;
 
 interface AlertProps {
   variant?: string;
+  className?: string;
   children: React.ReactNode;
 }
 
-export const Alert: React.FC<AlertProps> = ({ children, variant }) => (
-  <AlertElement className={variant}>{children}</AlertElement>
+export const Alert: React.FC<AlertProps> = ({ children, variant, className }) => (
+  <AlertElement className={[variant, className].filter(x => x !== undefined).join(' ')}>{children}</AlertElement>
 );

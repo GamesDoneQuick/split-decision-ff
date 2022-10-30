@@ -32,6 +32,10 @@ interface SiteConfiguration {
       dark: {
         background: string;
       };
+    },
+    warning: {
+      background: string;
+      text: string;
     }
   }
 }
@@ -67,6 +71,10 @@ const DEFAULT_CONFIG: SiteConfiguration = {
       dark: {
         background: '#C4244A',
       },
+    },
+    warning: {
+      background: '#F2BB77',
+      text: '#6B3F08',
     },
   },
 } as const;
