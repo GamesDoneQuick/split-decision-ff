@@ -53,6 +53,7 @@ function createEmptySubmission(event: Event): SubmissionWithCategories {
     technicalNotes: '',
     flashingLights: false,
     contentWarning: '',
+    soloCommentary: false,
     description: '',
     categories: [],
     createdAt: null,

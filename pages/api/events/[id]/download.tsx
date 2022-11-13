@@ -25,6 +25,7 @@ interface ExportedSubmissionRow {
   technicalNotes: string;
   contentWarning: string;
   flashingLights: string;
+  soloCommentary: string;
 }
 
 interface ExportedCategory {
@@ -48,6 +49,7 @@ const EXPORTED_SUBMISSION_FIELDS: [keyof ExportedSubmissionRow, string][] = [
   ['technicalNotes', 'Technical Notes'],
   ['contentWarning', 'Content Warning'],
   ['flashingLights', 'Flashing Lights'],
+  ['soloCommentary', 'Solo Commentary'],
 ];
 
 const EXPORTED_CATEGORY_FIELDS: [keyof ExportedCategory, string][] = [
@@ -163,19 +165,20 @@ export default async function handle(req: Request, res: Response) {
           availabilityString = availabilitySegments.map(segment => `${segment.date} ${segment.start}:00-${segment.end === 23 ? '23:59' : `${segment.end}:00`}`).join(', ');
         }
 
-        const baseData = {
+        const baseData: ExportedSubmissionRow = {
           userName: submission.user.displayName || submission.user.name || '<username missing>',
-          pronouns: submission.user.pronouns,
-          showPronouns: submission.user.showPronouns,
+          pronouns: submission.user.pronouns ?? '',
+          showPronouns: submission.user.showPronouns.toString(),
           availability: availabilityString,
           gameTitle: submission.gameTitle,
           platform: submission.platform,
           description: submission.description,
           primaryGenre: submission.primaryGenre,
-          secondaryGenre: submission.secondaryGenre,
-          technicalNotes: submission.technicalNotes,
-          contentWarning: submission.contentWarning,
-          flashingLights: submission.flashingLights,
+          secondaryGenre: submission.secondaryGenre ?? '',
+          technicalNotes: submission.technicalNotes ?? '',
+          contentWarning: submission.contentWarning ?? '',
+          flashingLights: submission.flashingLights.toString(),
+          soloCommentary: submission.soloCommentary.toString(),
         };
         
         return submission.categories.reduce((acc, category, index) => ({

@@ -31,6 +31,9 @@ const Home: NextPage = () => {
         </WelcomeMessage>
         <WelcomeDetails>
           You must be a member of the {SiteConfig.organizationName} community to submit to our events.
+          You can send a DM to&nbsp;
+          <a href="https://twitter.com/framefatales" target="_blank" rel="noopener noreferrer">@FrameFatales on Twitter</a>&nbsp;
+          or email <a href="mailto:framefatales@gamesdonequick.com">framefatales@gamesdonequick.com</a> to join.
         </WelcomeDetails>
       </LoginColumn>
     </Container>
@@ -88,4 +91,9 @@ const WelcomeMessage = styled.h1`
 const WelcomeDetails = styled.p`
   font-size: 1.25rem;
   text-align: center;
+
+  & a {
+    color: ${SiteConfig.colors.accents.link};
+    text-decoration: underline;
+  }
 `;
