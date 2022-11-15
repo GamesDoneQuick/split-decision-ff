@@ -93,6 +93,7 @@ const Header = styled.div`
   background-color: ${SiteConfig.colors.accents.link};
   font-size: 1.5rem;
   align-items: center;
+  font-family: 'Josefin Sans';
 
   @media screen and (max-width: 500px) {
     a {
@@ -114,6 +115,6 @@ const PageContent = styled.div`
 
 const LoginButton = styled(Button)`
   font-size: 1rem;
-  padding: 0.25rem 1.5rem;
-  line-height: 1;
+  padding: 0.5rem 1.5rem;
+  line-height: normal;
 `;
