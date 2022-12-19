@@ -15,6 +15,7 @@ interface DateSegment {
 interface ExportedSubmissionRow {
   userName: string;
   pronouns: string;
+  email: string;
   showPronouns: string;
   availability: string;
   gameTitle: string;
@@ -35,6 +36,7 @@ interface ExportedSubmissionRow {
 const EXPORTED_SUBMISSION_FIELDS: [keyof ExportedSubmissionRow, string][] = [
   ['userName', 'Runner'],
   ['pronouns', 'Pronouns'],
+  ['email', 'Email'],
   ['showPronouns', 'Show pronouns?'],
   ['availability', 'Availability'],
   ['gameTitle', 'Game Title'],
@@ -162,6 +164,7 @@ export default async function handle(req: Request, res: Response) {
         const baseData = {
           userName: submission.user.displayName || submission.user.name || '<username missing>',
           pronouns: submission.user.pronouns,
+          email: submission.user.email,
           showPronouns: submission.user.showPronouns,
           availability: availabilityString,
           gameTitle: submission.gameTitle,

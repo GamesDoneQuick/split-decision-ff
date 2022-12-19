@@ -12,7 +12,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ title, descriptions 
 
   useOnMount(() => {
     setSelectedIndex(Math.floor(Math.random() * descriptions.length));
-  })
+  });
 
   return (
     <Container>
