@@ -128,6 +128,7 @@ export default async function handle(req: Request, res: Response) {
           estimate: category.estimate,
           description: category.description,
         })),
+        soloCommentary: req.body.soloCommentary,
       };
 
       if (editableData.categories.length > event.maxCategories) {

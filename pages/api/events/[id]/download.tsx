@@ -160,9 +160,17 @@ export default async function handle(req: Request, res: Response) {
 
           availabilityString = availabilitySegments.map(segment => `${segment.date} ${segment.start}:00-${segment.end === 23 ? '23:59' : `${segment.end}:00`}`).join(', ');
         }
+        
+        let username = submission.user.name;
+
+        if (submission.user.displayName) {
+          username = `${submission.user.displayName} (${submission.user.name})`;
+        } else if (!username) {
+          username = '<username missing>';
+        }
 
         const baseData = {
-          userName: submission.user.displayName || submission.user.name || '<username missing>',
+          userName: username,
           pronouns: submission.user.pronouns,
           email: submission.user.email,
           showPronouns: submission.user.showPronouns,
