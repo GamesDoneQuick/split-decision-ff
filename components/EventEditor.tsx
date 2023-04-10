@@ -26,6 +26,7 @@ function stringifyEvent(event: Event | EventWithStringDates): EventWithStringDat
     ...event,
     gameSubmissionPeriodStart: forceAsString(event.gameSubmissionPeriodStart),
     gameSubmissionPeriodEnd: forceAsString(event.gameSubmissionPeriodEnd),
+    incentiveSubmissionPeriodEnd: forceAsString(event.incentiveSubmissionPeriodEnd),
     eventStart: forceAsString(event.eventStart),
   };
 }
@@ -62,6 +63,10 @@ export const EventEditor: React.FC<EventEditorProps> = ({ event: eventRecord, on
 
   const handleUpdateSubmissionPeriodEnd = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setEventField('gameSubmissionPeriodEnd', event.target.value);
+  }, [setEventField]);
+
+  const handleUpdateIncentivePeriodEnd = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setEventField('incentiveSubmissionPeriodEnd', event.target.value);
   }, [setEventField]);
 
   const handleUpdateEventStart = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -188,7 +193,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({ event: eventRecord, on
         />
       </FormItem>
       <FormItem>
-        <Label htmlFor="gameSubmissionPeriodStart">Submission Period Start (UTC)</Label>
+        <Label htmlFor="gameSubmissionPeriodStart">Game Submission Period Start (UTC)</Label>
         <TextInput
           id="gameSubmissionPeriodStart"
           type="text"
@@ -198,13 +203,23 @@ export const EventEditor: React.FC<EventEditorProps> = ({ event: eventRecord, on
         />
       </FormItem>
       <FormItem>
-        <Label htmlFor="gameSubmissionPeriodEnd">Submission Period End (UTC)</Label>
+        <Label htmlFor="gameSubmissionPeriodEnd">Game Submission Period End (UTC)</Label>
         <TextInput
           id="gameSubmissionPeriodEnd"
           type="text"
           value={validatedEvent.value.gameSubmissionPeriodEnd}
           error={validatedEvent.error?.gameSubmissionPeriodEnd}
           onChange={handleUpdateSubmissionPeriodEnd}
+        />
+      </FormItem>
+      <FormItem>
+        <Label htmlFor="incentiveSubmissionPeriodEnd">Incentive Submission Period End (UTC)</Label>
+        <TextInput
+          id="incentiveSubmissionPeriodEnd"
+          type="text"
+          value={validatedEvent.value.incentiveSubmissionPeriodEnd}
+          error={validatedEvent.error?.incentiveSubmissionPeriodEnd}
+          onChange={handleUpdateIncentivePeriodEnd}
         />
       </FormItem>
       <FormItem>

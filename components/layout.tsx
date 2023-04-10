@@ -88,15 +88,15 @@ const SelectInputControl = styled.select<{ hasError: boolean }>`
   padding: 0.5rem;
 `;
 
-const InputError = styled.p`
+export const InputError = styled.p`
   margin: 0.25rem 0 0;
   color: ${SiteConfig.colors.error.text};
   font-size: 1rem;
 `;
 
-export const HelpText = styled.p`
+export const HelpText = styled.p<{ dark?: boolean }>`
   margin: 0.5rem 0 0;
-  color: ${SiteConfig.colors.text.light};
+  color: ${({ dark }) => dark ? SiteConfig.colors.text.darkLabel : SiteConfig.colors.text.light};
   font-style: italic;
   font-size: 1rem;
 `;
@@ -104,12 +104,13 @@ export const HelpText = styled.p`
 interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string | null;
   helpText?: string | null;
+  dark?: boolean;
 }
 
-export const TextInput: React.FC<TextInputProps> = ({ error, helpText, ...inputProps }) => (
+export const TextInput: React.FC<TextInputProps> = ({ error, helpText, dark, ...inputProps }) => (
   <InputControlContainer>
     <TextInputControl hasError={error !== null && error !== undefined} {...inputProps} />
-    {helpText && <HelpText>{helpText}</HelpText>}
+    {helpText && <HelpText dark={dark}>{helpText}</HelpText>}
     {error && <InputError>{error}</InputError>}
   </InputControlContainer>
 );
@@ -117,12 +118,13 @@ export const TextInput: React.FC<TextInputProps> = ({ error, helpText, ...inputP
 interface TextAreaInputProps extends React.InputHTMLAttributes<HTMLTextAreaElement> {
   error?: string | null;
   helpText?: string | null;
+  dark?: boolean;
 }
 
-export const TextAreaInput: React.FC<TextAreaInputProps> = ({ error, helpText, ...inputProps }) => (
+export const TextAreaInput: React.FC<TextAreaInputProps> = ({ error, helpText, dark, ...inputProps }) => (
   <InputControlContainer>
     <TextAreaInputControl hasError={error !== null && error !== undefined} {...inputProps} />
-    {helpText && <HelpText>{helpText}</HelpText>}
+    {helpText && <HelpText dark={dark}>{helpText}</HelpText>}
     {error && <InputError>{error}</InputError>}
   </InputControlContainer>
 );
@@ -130,12 +132,13 @@ export const TextAreaInput: React.FC<TextAreaInputProps> = ({ error, helpText, .
 interface SelectInputProps extends React.InputHTMLAttributes<HTMLSelectElement> {
   error?: string | null;
   helpText?: string | null;
+  dark?: boolean;
 }
 
-export const SelectInput: React.FC<SelectInputProps> = ({ error, helpText, ...inputProps }) => (
+export const SelectInput: React.FC<SelectInputProps> = ({ error, helpText, dark, ...inputProps }) => (
   <InputControlContainer>
     <SelectInputControl hasError={error !== null && error !== undefined} {...inputProps} />
-    {helpText && <HelpText>{helpText}</HelpText>}
+    {helpText && <HelpText dark={dark}>{helpText}</HelpText>}
     {error && <InputError>{error}</InputError>}
   </InputControlContainer>
 );
@@ -276,6 +279,10 @@ export const AlertElement = styled.div`
   &.error {
     background-color: ${SiteConfig.colors.error.background};
     color: ${SiteConfig.colors.error.text};
+
+    & a {
+      color: ${SiteConfig.colors.accents.linkDark};
+    }
   }
 
   &.warning {

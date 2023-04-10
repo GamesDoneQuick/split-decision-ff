@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { GameSubmission, GameSubmissionCategory, User } from '@prisma/client';
+import { GameSubmission, GameSubmissionCategory, RunIncentive, User, VettingInfo } from '@prisma/client';
 import Joi from 'joi';
-import { EventWithStringDates } from './models';
+import { EventWithStringDates, IncentiveWithCategoryIds } from './models';
 
 const TIMESTAMP_REGEX = /^(?:(?:([0-9]*?\d|2[0-9]):)?([0-5]\d):)?([0-5]\d)$/;
 
@@ -25,6 +25,30 @@ const GameSubmissionCategoryValidationSchema = Joi.object<GameSubmissionCategory
   }),
 }).unknown(true);
 
+const IncentiveValidationSchemaRules = {
+  name: Joi.string().required().max(100).messages({
+    'string.empty': 'Incentive name is required.',
+    'string.max': 'Incentive name cannot be longer than 100 characters.',
+  }),
+  videoURL: Joi.string().required().uri().max(2048).messages({
+    'string.empty': 'Video link is required.',
+    'string.uri': 'Video link must be a valid URL.',
+    'string.max': 'Video link cannot be longer than 100 characters.',
+  }),
+  estimate: Joi.string().required().pattern(TIMESTAMP_REGEX).messages({
+    'string.empty': 'Estimate is required.',
+    'string.pattern.base': 'Estimate must be in the format MM:SS, H:MM:SS, or HH:MM:SS',
+  }),
+  description: Joi.string().required().max(1000).messages({
+    'string.empty': 'Description is required.',
+    'string.max': 'Description cannot be longer than 1,000 characters.',
+  }),
+  closeTime: Joi.string().required().max(250).messages({
+    'string.empty': 'Close time is required.',
+    'string.max': 'Close time cannot be longer than 250 characters.',
+  }),
+};
+
 export const ValidationSchemas = {
   User: Joi.object<User>({
     displayName: Joi.string().allow('').max(50).allow(null).messages({
@@ -38,6 +62,10 @@ export const ValidationSchemas = {
     pronouns: Joi.string().allow('').allow(null).max(50).messages({
       'string.max': 'Pronouns cannot be longer than 50 characters.',
     }),
+  }).unknown(true),
+  VettingInfo: Joi.object<VettingInfo>({
+    twitterAccounts: Joi.string(),
+    twitchAccounts: Joi.string(),
   }).unknown(true),
   Event: Joi.object<EventWithStringDates>({
     eventName: Joi.string().required().messages({ 'string.empty': 'Event name is required.' }),
@@ -82,6 +110,13 @@ export const ValidationSchemas = {
     visible: Joi.boolean(),
   }).unknown(true),
   GameSubmissionCategory: GameSubmissionCategoryValidationSchema,
+  RunIncentive: Joi.object<RunIncentive>({ ...IncentiveValidationSchemaRules }).unknown(true),
+  RunIncentiveWithCategoryIds: Joi.object<IncentiveWithCategoryIds>({
+    ...IncentiveValidationSchemaRules,
+    attachedCategories: Joi.array().items(Joi.string()).min(1).messages({
+      'array.min': 'At least one category must be selected',
+    }),
+  }).unknown(true),
   GameSubmission: Joi.object<GameSubmission & { categories: GameSubmissionCategory[] }>({
     gameTitle: Joi.string().required().max(100).messages({
       'string.empty': 'Game title is required.',

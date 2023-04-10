@@ -54,6 +54,7 @@ model User {
   sessions            Session[]
   gameSubmissions     GameSubmission[]
   eventAvailabilities EventAvailability[]
+  vettingInfo         VettingInfo?
 }
 
 model VerificationToken {
@@ -64,13 +65,25 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Submissions
+model VettingInfo {
+  id              String    @id @unique @default(cuid())
+  userId          String
+  twitterAccounts String
+  twitchAccounts  String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
 
+  @@unique([userId])
+}
+
+// Submissions
 model Event {
   id                        String              @id @unique @default(cuid())
   eventName                 String
   gameSubmissionPeriodStart DateTime
   gameSubmissionPeriodEnd   DateTime
+  incentiveSubmissionPeriodEnd        DateTime
   eventStart                DateTime
   eventDays                 Int                 @default(3)
   startTime                 Int                 @default(9)
@@ -79,6 +92,7 @@ model Event {
   runStatusVisible          Boolean             @default(false)
   maxSubmissions            Int                 @default(5)
   maxCategories             Int                 @default(5)
+  maxIncentives             Int                 @default(5)
   genres                    String[]            @default([])
   gameSubmissions           GameSubmission[]
   eventAvailabilities       EventAvailability[]
@@ -114,22 +128,24 @@ model GameSubmission {
   soloCommentary Boolean                  @default(false)
   user           User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
   categories     GameSubmissionCategory[]
+  incentives     RunIncentive[]
   event          Event                    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   createdAt      DateTime?                @default(now())
   updatedAt      DateTime?                @updatedAt
 }
 
 model GameSubmissionCategory {
-  id               String         @id @unique @default(cuid())
-  gameSubmissionId String
-  categoryName     String
-  videoURL         String
-  estimate         String
-  description      String
-  runStatus        RunStatus      @default(Pending)
-  gameSubmission   GameSubmission @relation(fields: [gameSubmissionId], references: [id], onDelete: Cascade)
-  createdAt        DateTime?      @default(now())
-  updatedAt        DateTime?      @updatedAt
+  id                 String                   @id @unique @default(cuid())
+  gameSubmissionId   String
+  categoryName       String
+  videoURL           String
+  estimate           String
+  description        String
+  runStatus          RunStatus                @default(Pending)
+  gameSubmission     GameSubmission           @relation(fields: [gameSubmissionId], references: [id], onDelete: Cascade)
+  attachedIncentives IncentivesOnCategories[]
+  createdAt          DateTime?                @default(now())
+  updatedAt          DateTime?                @updatedAt
 }
 
 enum RunStatus {
@@ -138,4 +154,27 @@ enum RunStatus {
   Backup
   Bonus
   Pending
+}
+
+model RunIncentive {
+  id                 String                   @id @unique @default(cuid())
+  gameSubmissionId   String
+  name               String
+  videoURL           String
+  estimate           String
+  closeTime          String
+  description        String
+  attachedCategories IncentivesOnCategories[]
+  gameSubmission     GameSubmission           @relation(fields: [gameSubmissionId], references: [id], onDelete: Cascade)
+  createdAt          DateTime?                @default(now())
+  updatedAt          DateTime?                @updatedAt
+}
+
+model IncentivesOnCategories {
+  category    GameSubmissionCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId  String
+  incentive   RunIncentive           @relation(fields: [incentiveId], references: [id], onDelete: Cascade)
+  incentiveId String
+
+  @@id([incentiveId, categoryId])
 }

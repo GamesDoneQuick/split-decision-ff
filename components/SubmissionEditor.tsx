@@ -175,6 +175,7 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
           error={validatedSubmission.error?.secondaryGenre}
           onChange={handleUpdateSecondaryGenre}
           helpText="If more than two genres apply to this submission, pick the two that best represent it."
+          dark
         >
           <option value="">(None)</option>
           {eventRecord.genres.map(option => (
@@ -222,6 +223,7 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
           maxLength={1000}
           onChange={handleUpdateTechnicalNotes}
           helpText={`Technical notes are not shown on the public submission list, and are only used by the ${SiteConfig.organizationName} production team.`}
+          dark
         />
       </FormItem>
       <Separator />

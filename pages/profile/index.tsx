@@ -6,16 +6,17 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 // eslint-disable-next-line camelcase
 import { unstable_getServerSession } from 'next-auth';
-import { User } from '@prisma/client';
-import { Anchor, TextButton } from '../../components/layout';
+import { Anchor, Button, TextButton } from '../../components/layout';
 import { ProfileEditor } from '../../components/ProfileEditor';
 import { EventList } from '../../components/EventList';
 import { prisma } from '../../utils/db';
 import { authOptions } from '../api/auth/[...nextauth]';
 import { SiteConfig } from '../../utils/siteConfig';
+import { VettingInfoAlert } from '../../components/VettingInfoAlert';
+import { prepareUserForTransfer, UserWithVettingInfo } from '../../utils/models';
 
 interface SubmissionsHomeProps {
-  user: User;
+  user: UserWithVettingInfo;
 
 }
 const SubmissionsHome: NextPage<SubmissionsHomeProps> = ({ user }) => {
@@ -30,7 +31,7 @@ const SubmissionsHome: NextPage<SubmissionsHomeProps> = ({ user }) => {
   }, []);
   
   const navigateToEvent = useCallback((id: string) => {
-    router.push(`/submissions/event/${id}`);
+    router.push(`/submissions/${id}`);
   }, [router]);
 
   if (session.status !== 'authenticated') return null;
@@ -40,6 +41,11 @@ const SubmissionsHome: NextPage<SubmissionsHomeProps> = ({ user }) => {
       <WelcomeMessageContainer>
         <WelcomeMessage>
           Hi, {user.displayName || user.name}!
+          <UserActions>
+            <Link href="/profile/vetting">
+              <Button>Update Vetting Info</Button>
+            </Link>
+          </UserActions>
         </WelcomeMessage>
         <p>
           (Not you? <TextButton onClick={handleSignout}>Click here to log out.</TextButton>)
@@ -58,7 +64,8 @@ const SubmissionsHome: NextPage<SubmissionsHomeProps> = ({ user }) => {
           <ProfileEditor user={user} />
         </ProfileColumn>
         <SubmissionsColumn>
-          <EventList onClick={navigateToEvent} />
+          {!user.vettingInfo && <VettingInfoAlert user={user} />}
+          {user.vettingInfo && <EventList onClick={navigateToEvent} />}
         </SubmissionsColumn>
       </ColumnContainer>
     </Container>
@@ -81,6 +88,9 @@ export async function getServerSideProps(context: NextPageContext) {
     where: {
       id: session.user.id,
     },
+    include: {
+      vettingInfo: true,
+    },
   });
 
   if (!user) {
@@ -93,7 +103,7 @@ export async function getServerSideProps(context: NextPageContext) {
 
   return {
     props: {
-      user,
+      user: prepareUserForTransfer(user),
     },
   };
 }
@@ -155,11 +165,35 @@ const SubmissionsColumn = styled.div`
 `;
 
 const WelcomeMessage = styled.h1`
+  display: flex;
+  flex-direction: row;
+  align-items: space-between;
+  justify-content: center;
   font-size: 3.5rem;
   font-weight: 700;
   margin-bottom: 0;
 
   @media screen and (max-width: 500px) {
     margin-top: 1rem;
+  }
+  
+  @media screen and (max-width: 800px) {
+    flex-direction: column;
+  }
+`;
+
+const UserActions = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-left: auto;
+  
+  & button {
+    height: 2.5rem;
+    padding: 0.5rem 1rem;
+  }
+
+  @media screen and (max-width: 800px) {
+    margin: 0.5rem 0 1rem;
   }
 `;

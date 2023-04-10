@@ -16,6 +16,7 @@ interface SiteConfiguration {
       separator: string;
       alert: string;
       link: string;
+      linkDark: string;
       activeTimeslot: string;
       hover: {
         control: string;
@@ -25,6 +26,7 @@ interface SiteConfiguration {
       primary: string;
       light: string;
       dark: string;
+      darkLabel: string;
     },
     error: {
       background: string;
@@ -55,6 +57,7 @@ const DEFAULT_CONFIG: SiteConfiguration = {
       separator: '#F2BB77',
       alert: '#D4DFF2',
       link: '#ACCBFF',
+      linkDark: '#3E5A8A',
       activeTimeslot: '#02DBB4',
       hover: {
         control: '#a7487c',
@@ -64,10 +67,11 @@ const DEFAULT_CONFIG: SiteConfiguration = {
       primary: '#B5B5B5',
       light: '#E0E0E0',
       dark: '#000',
+      darkLabel: '#555',
     },
     error: {
       background: '#FEECEC',
-      text: '#F26D8D',
+      text: '#B13855',
       dark: {
         background: '#C4244A',
       },

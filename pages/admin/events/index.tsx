@@ -21,6 +21,7 @@ function createEmptyEvent(): Event {
     eventName: '',
     gameSubmissionPeriodStart: new Date(),
     gameSubmissionPeriodEnd: new Date(),
+    incentiveSubmissionPeriodEnd: new Date(),
     eventStart: new Date(),
     eventDays: 3,
     startTime: 9,
@@ -29,6 +30,7 @@ function createEmptyEvent(): Event {
     runStatusVisible: true,
     maxSubmissions: 5,
     maxCategories: 5,
+    maxIncentives: 5,
     genres: [],
     createdAt: null,
     updatedAt: null,
@@ -57,6 +59,7 @@ const EventDetails: NextPage<EventDetailsProps> = ({ events: eventsFromServer })
       ...event,
       gameSubmissionPeriodStart: forceAsDate(event.gameSubmissionPeriodStart),
       gameSubmissionPeriodEnd: forceAsDate(event.gameSubmissionPeriodEnd),
+      incentiveSubmissionPeriodEnd: forceAsDate(event.incentiveSubmissionPeriodEnd),
       eventStart: forceAsDate(event.eventStart),
     };
 
@@ -93,7 +96,7 @@ const EventDetails: NextPage<EventDetailsProps> = ({ events: eventsFromServer })
   return (
     <Container>
       <WelcomeMessageContainer>
-        <Link href="/submissions">
+        <Link href="/profile">
           <ReturnToProfile>Return to my profile</ReturnToProfile>
         </Link>
         <WelcomeMessage>
@@ -205,6 +208,7 @@ const ReturnToProfile = styled.a`
   color: ${SiteConfig.colors.accents.link};
   font-size: 1.25rem;
   margin: 1rem 0;
+  cursor: pointer;
 
   &:hover,
   &:active {

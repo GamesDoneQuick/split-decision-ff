@@ -49,6 +49,7 @@
     "no-trailing-spaces": ["error", { "skipBlankLines": true }],
     "no-console": ["error", { "allow": ["warn", "error", "info" ] }],
     "no-bitwise": "off",
+    "quotes": ["error", "single"],
     "newline-per-chained-call": "off",
     "react/jsx-filename-extension": ["error", { "extensions": [".tsx", ".jsx"] }],
     "react/no-array-index-key": "off",

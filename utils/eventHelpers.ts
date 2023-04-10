@@ -27,6 +27,17 @@ export function isAfterSubmissionPeriod(event: Event): boolean {
   return isAfter(now, endDate);
 }
 
+export function isAfterIncentivePeriod(event: Event): boolean {
+  const now = new Date().getTime();
+  const endDate = forceAsDate(event.incentiveSubmissionPeriodEnd);
+
+  return isAfter(now, endDate);
+}
+
 export function areSubmissionsOpen(event: Event): boolean {
   return !isBeforeSubmissionPeriod(event) && !isAfterSubmissionPeriod(event);
+}
+
+export function areIncentivesOpen(event: Event): boolean {
+  return !isBeforeSubmissionPeriod(event) && !isAfterIncentivePeriod(event);
 }

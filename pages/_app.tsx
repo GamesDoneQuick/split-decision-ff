@@ -14,7 +14,7 @@ const HeaderActions: React.FC = () => {
   const session = useSession();
 
   const discordLogin = useCallback(() => {
-    signIn('discord', { callbackUrl: '/submissions' });
+    signIn('discord', { callbackUrl: '/profile' });
   }, []);
   
   const isLoggedIn = session.status === 'authenticated';
@@ -23,7 +23,7 @@ const HeaderActions: React.FC = () => {
     <HeaderActionsContainer>
       {!isLoggedIn && <LoginButton onClick={discordLogin}>Log In with Discord</LoginButton>}
       {isLoggedIn && (
-        <Link href="/submissions">
+        <Link href="/profile">
           <a><LoginButton>Submission Manager</LoginButton></a>
         </Link>
       )}

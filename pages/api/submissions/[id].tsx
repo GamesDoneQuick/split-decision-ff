@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { unstable_getServerSession } from 'next-auth';
 import { prisma } from '../../../utils/db';
 import { areSubmissionsOpen } from '../../../utils/eventHelpers';
+import { fetchUserWithVettingInfo } from '../../../utils/models';
 import { ValidationSchemas } from '../../../utils/validation';
 import { authOptions } from '../auth/[...nextauth]';
 
@@ -54,6 +55,14 @@ export default async function handle(req: Request, res: Response) {
       if (!session) {
         res.status(401).json({ message: 'You must be logged in.' });
   
+        return;
+      }
+
+      const user = await fetchUserWithVettingInfo(req, res);
+
+      if (!user?.vettingInfo) {
+        res.status(401).json({ message: 'You cannot submit to an event until you have filled out the vetting form.' });
+
         return;
       }
       
