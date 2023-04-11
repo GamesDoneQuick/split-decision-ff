@@ -60,9 +60,9 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({ submission }) => 
           {submission.categories.map(category => (
             <tr key={category.id}>
               <td width="15%">
-                <a href={category.videoURL} target="_blank" rel="noopener noreferrer">
+                <VideoLink href={category.videoURL} target="_blank" rel="noopener noreferrer">
                   {category.categoryName}
-                </a>
+                </VideoLink>
               </td>
               <NumericCell width="10%">{category.estimate}</NumericCell>
               <DescriptionCell>{category.description}</DescriptionCell>
@@ -212,4 +212,8 @@ const SubmissionWarningRow = styled(GameDetailsRow)`
 
 const DescriptionCell = styled.td`
   word-break: break-word;  
+`;
+
+const VideoLink = styled.a`
+  text-decoration: underline;
 `;
