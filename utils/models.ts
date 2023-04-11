@@ -2,6 +2,7 @@ import { User, Event, GameSubmission, GameSubmissionCategory, VettingInfo, RunIn
 import { IncomingMessage, ServerResponse } from 'http';
 // eslint-disable-next-line camelcase
 import { unstable_getServerSession } from 'next-auth';
+import { prisma } from './db';
 import { authOptions } from '../pages/api/auth/[...nextauth]';
 
 export type UserWithVettingInfo = User & { vettingInfo?: VettingInfo | null };
