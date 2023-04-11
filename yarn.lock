@@ -160,6 +160,11 @@
     "@babel/helper-validator-identifier" "^7.19.1"
     to-fast-properties "^2.0.0"
 
+"@bitty/pipe@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@bitty/pipe/-/pipe-0.3.0.tgz#91455955fcd586357316799003d56d9aca03a715"
+  integrity sha512-Ft4tmMM8vfuQOD3jpmvCYPEXoLhWLXWh/Mkeql09d3+9FFMaQBdFdo8GBmhQ01z+D6P3NkqNq02rbb4oBkhjLw==
+
 "@discordjs/builders@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@discordjs/builders/-/builders-1.2.0.tgz#4f5059e258c30a26931ae384985ef8c6b371ba05"
@@ -2661,6 +2666,13 @@ next@12.3.1:
     "@next/swc-win32-arm64-msvc" "12.3.1"
     "@next/swc-win32-ia32-msvc" "12.3.1"
     "@next/swc-win32-x64-msvc" "12.3.1"
+
+normalize-text@^2.4.1:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/normalize-text/-/normalize-text-2.4.1.tgz#dba275ef7d36533ea278fdd6e2e216eec34f3f74"
+  integrity sha512-cmckAM5KW/lvqJoDUZWOdMHswvEA5LBEtkR/0YXv6iNV+4+5Aha+1lOKQuVFT38lnRavDRSzpoxb9DTt/3nbOw==
+  dependencies:
+    "@bitty/pipe" "^0.3.0"
 
 oauth@^0.9.15:
   version "0.9.15"

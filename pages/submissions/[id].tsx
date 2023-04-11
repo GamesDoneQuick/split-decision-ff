@@ -3,21 +3,20 @@ import styled from 'styled-components';
 import type { NextPage, NextPageContext } from 'next';
 import { useSession } from 'next-auth/react';
 import { Event, EventAvailability } from '@prisma/client';
-import { format, intlFormat, parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 // eslint-disable-next-line camelcase
 import Link from 'next/link';
 import ScheduleSelector from 'react-schedule-selector';
 import { zonedTimeToUtc, utcToZonedTime } from 'date-fns-tz';
 import { prisma } from '../../utils/db';
-import { getEventSubmissionTimeString } from '../../components/EventList';
 import { areIncentivesOpen, areSubmissionsOpen } from '../../utils/eventHelpers';
 import { fetchServerSession, fetchUserWithVettingInfo, IncentiveWithCategories, prepareRecordForTransfer, prepareSubmissionForTransfer, prepareUserForTransfer, SubmissionWithCategories, UserWithVettingInfo } from '../../utils/models';
 import { SiteConfig } from '../../utils/siteConfig';
-import { useOnMount } from '../../utils/hooks';
 import { VettingInfoAlert } from '../../components/VettingInfoAlert';
 import { TabSidebar } from '../../components/TabSidebar';
 import { SubmissionEditTab } from '../../components/SubmissionEditTab';
 import { IncentiveEditTab } from '../../components/IncentiveEditTab';
+import { EventHeader } from '../../components/EventHeader';
 
 const SUBMISSION_TABS_SUBMISSIONS_CLOSED = [
   { value: 'submissions', label: 'Submissions' },
@@ -77,7 +76,6 @@ const EventDetails: NextPage<EventDetailsProps> = ({ user, event, submissions: s
     ...availabilityFromServer,
     slots: availabilityFromServer.slots.map(slot => fromServerTime(parseISO(slot))),
   }));
-  const [submissionCloseTime, setSubmissionCloseTime] = useState('');
 
   const handleUpdateAvailability = useCallback((slots: Date[]) => {
     setAvailability({
@@ -103,24 +101,13 @@ const EventDetails: NextPage<EventDetailsProps> = ({ user, event, submissions: s
     allowSubmissions ? SUBMISSION_TABS_SUBMISSIONS_OPEN : SUBMISSION_TABS_SUBMISSIONS_CLOSED
   ), [allowSubmissions]);
 
-  useOnMount(() => {
-    // Prevent a SSR hydration error when less than 1 minute remains.
-    setSubmissionCloseTime(getEventSubmissionTimeString(event));
-  });
-
   return (
     <Container>
       <WelcomeMessageContainer>
         <Link href="/profile">
           <ReturnToProfile>Return to my profile</ReturnToProfile>
         </Link>
-        <WelcomeMessage>
-          {event.eventName}
-          <EventStats>
-            <EventStartTime>Starts on {intlFormat(parseISO((event.eventStart as unknown) as string))}</EventStartTime>
-            <SubmissionCloseTime>{submissionCloseTime}</SubmissionCloseTime>
-          </EventStats>
-        </WelcomeMessage>
+        <EventHeader event={event} />
       </WelcomeMessageContainer>
       <SystemAlerts>
         <VettingInfoAlert user={user} />
@@ -282,33 +269,6 @@ const WelcomeMessageContainer = styled.div`
   }
 `;
 
-const WelcomeMessage = styled.h1`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  font-size: 3.5rem;
-  font-weight: 700;
-  margin: 0;
-
-  @media screen and (max-width: 800px) {
-    flex-direction: column;
-    text-align: left;
-    align-items: flex-start;
-  }
-`;
-
-const EventStartTime = styled.h2`
-  font-size: 1.5rem;
-  font-style: italic;
-  font-weight: 400;
-  margin: 0 0 0.5rem;
-`;
-
-const SubmissionCloseTime = styled.h2`
-  font-size: 1.75rem;
-  margin: 0.5rem 0;
-`;
-
 const ReturnToProfile = styled.a`
   display: block;
   color: ${SiteConfig.colors.accents.link};
@@ -386,14 +346,4 @@ const ContentColumn = styled.div`
   align-self: stretch;
   background-color: ${SiteConfig.colors.accents.separator};
   color: ${SiteConfig.colors.text.dark};
-`;
-
-const EventStats = styled.div`
-  margin-left: auto;  
-  text-align: right;
-
-  @media screen and (max-width: 800px) {
-    margin: 0;
-    text-align: left;
-  }
 `;

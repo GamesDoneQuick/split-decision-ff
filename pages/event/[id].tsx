@@ -1,15 +1,16 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import type { NextPage, NextPageContext } from 'next';
 import { Event } from '@prisma/client';
-import { intlFormat, parseISO } from 'date-fns';
 import { NextSeo } from 'next-seo';
-// eslint-disable-next-line camelcase
+import { useRouter } from 'next/router';
+import { normalizeText } from 'normalize-text';
 import { prisma } from '../../utils/db';
-import { getEventSubmissionTimeString } from '../../components/EventList';
 import { SubmissionList } from '../../components/SubmissionList';
 import { prepareRecordForTransfer, SubmissionWithCategoriesAndUsername } from '../../utils/models';
 import { SiteConfig } from '../../utils/siteConfig';
+import { Label, TextInput } from '../../components/layout';
+import { EventHeader } from '../../components/EventHeader';
 
 interface EventDetailsProps {
   event: Event;
@@ -17,8 +18,27 @@ interface EventDetailsProps {
 }
 
 const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions }) => {
-  const submissionCloseTime = useMemo(() => getEventSubmissionTimeString(event, true), [event]);
-    
+  const router = useRouter();
+  const [filterValue, setFilterValue] = useState((router.query.filter || '').toString());
+  const filteredSubmissions = useMemo(() => {
+    const normalizedQuery = normalizeText(filterValue || '');
+
+    if (normalizedQuery.length === 0) return submissions;
+
+    return submissions.filter(item => {
+      const submissionSearchString = normalizeText(`${item.gameTitle} ${item.user} ${item.categories.map(cat => cat.categoryName).join(' ')}`);
+
+      return submissionSearchString.indexOf(normalizedQuery) !== -1;
+    });
+  }, [filterValue, submissions]);
+
+  const handleUpdateFilterValue = useCallback((evt: React.ChangeEvent<HTMLInputElement>) => {
+    setFilterValue(evt.target.value);
+    router.replace({
+      query: { ...router.query, filter: evt.target.value },
+    });
+  }, [router]);
+
   return (
     <Container>
       <NextSeo
@@ -26,14 +46,21 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions }) => {
         description={`Event submissions for ${event.eventName}, a speedrunning marathon by ${SiteConfig.organizationName}.`}
       />
       <WelcomeMessageContainer>
-        <WelcomeMessage>
-          {event.eventName}
-        </WelcomeMessage>
-        <EventStartTime>Starts on {intlFormat(parseISO((event.eventStart as unknown) as string))}</EventStartTime>
-        <SubmissionCloseTime>{submissionCloseTime}</SubmissionCloseTime>
+        <EventHeaderContainer>
+          <EventHeader event={event} />
+        </EventHeaderContainer>
+        <FilterContainer>
+          <Label htmlFor="filterInput">Filter</Label>
+          <TextInput
+            id="filterInput"
+            value={filterValue}
+            onChange={handleUpdateFilterValue}
+            placeholder="Filter submissions..."
+          />
+        </FilterContainer>
       </WelcomeMessageContainer>
       <SubmissionListContainer>
-        <SubmissionList submissions={submissions} showUsernames />
+        <SubmissionList submissions={filteredSubmissions} showUsernames />
       </SubmissionListContainer>
     </Container>
   );
@@ -93,34 +120,22 @@ const Container = styled.div`
 `;
 
 const WelcomeMessageContainer = styled.div`
-  padding: 1rem;
-  border-bottom: 1px solid ${SiteConfig.colors.accents.separator};
-  padding-bottom: 0.5rem;
-
   & > p {
     font-size: 1.5rem;
     margin: 0 0 0.5rem;
   }
 `;
 
-const WelcomeMessage = styled.h1`
-  font-size: 3.5rem;
-  font-weight: 700;
-  margin: 0;
-`;
-
-const EventStartTime = styled.h2`
-  font-size: 1.5rem;
-  font-style: italic;
-  font-weight: 400;
-  margin: 0 0 0.5rem;
-`;
-
-const SubmissionCloseTime = styled.h2`
-  font-size: 1.75rem;
-  margin: 0.5rem 0;
+const EventHeaderContainer = styled.div`
+  padding: 1rem 1rem 0;
 `;
 
 const SubmissionListContainer = styled.div`
   overflow-y: auto;
+`;
+
+const FilterContainer = styled.div`
+  background-color: ${SiteConfig.colors.accents.separator};
+  color: ${SiteConfig.colors.text.dark};
+  padding: 1rem 1rem 1.5rem;
 `;
