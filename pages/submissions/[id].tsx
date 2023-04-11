@@ -116,9 +116,11 @@ const EventDetails: NextPage<EventDetailsProps> = ({ user, event, submissions: s
         </Link>
         <WelcomeMessage>
           {event.eventName}
+          <EventStats>
+            <EventStartTime>Starts on {intlFormat(parseISO((event.eventStart as unknown) as string))}</EventStartTime>
+            <SubmissionCloseTime>{submissionCloseTime}</SubmissionCloseTime>
+          </EventStats>
         </WelcomeMessage>
-        <EventStartTime>Starts on {intlFormat(parseISO((event.eventStart as unknown) as string))}</EventStartTime>
-        <SubmissionCloseTime>{submissionCloseTime}</SubmissionCloseTime>
       </WelcomeMessageContainer>
       <SystemAlerts>
         <VettingInfoAlert user={user} />
@@ -143,16 +145,18 @@ const EventDetails: NextPage<EventDetailsProps> = ({ user, event, submissions: s
               />
             </ScheduleSelectorContainer>
           )}
-          <ColumnContainer>
-            {activeTab === 'submissions' && (
+          {activeTab === 'submissions' && (
+            <ColumnContainer>
               <SubmissionEditTab
                 event={event}
                 submissions={submissions}
                 allowSubmissions={allowSubmissions}
                 onChange={setSubmissions}
               />
-            )}
-            {activeTab === 'incentives' && (
+            </ColumnContainer>
+          )}
+          {activeTab === 'incentives' && (
+            <ColumnContainer>
               <IncentiveEditTab
                 event={event}
                 submissions={submissions}
@@ -160,8 +164,8 @@ const EventDetails: NextPage<EventDetailsProps> = ({ user, event, submissions: s
                 allowIncentives={allowIncentives}
                 onChange={setIncentives}
               />
-            )}
-          </ColumnContainer>
+            </ColumnContainer>
+          )}
         </ContentColumn>
       </MainContent>
     </Container>
@@ -279,9 +283,18 @@ const WelcomeMessageContainer = styled.div`
 `;
 
 const WelcomeMessage = styled.h1`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   font-size: 3.5rem;
   font-weight: 700;
   margin: 0;
+
+  @media screen and (max-width: 800px) {
+    flex-direction: column;
+    text-align: left;
+    align-items: flex-start;
+  }
 `;
 
 const EventStartTime = styled.h2`
@@ -358,9 +371,9 @@ const MainContent = styled.div`
   height: 100%;
   overflow: hidden;
   flex-grow: 1;
-  border-top: 1px solid ${SiteConfig.colors.accents.separator};
-
+  
   @media screen and (max-width: 800px) {
+    border-top: 1px solid ${SiteConfig.colors.accents.separator};
     flex-direction: column;
   }
 `;
@@ -373,4 +386,14 @@ const ContentColumn = styled.div`
   align-self: stretch;
   background-color: ${SiteConfig.colors.accents.separator};
   color: ${SiteConfig.colors.text.dark};
+`;
+
+const EventStats = styled.div`
+  margin-left: auto;  
+  text-align: right;
+
+  @media screen and (max-width: 800px) {
+    margin: 0;
+    text-align: left;
+  }
 `;
