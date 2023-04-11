@@ -40,7 +40,6 @@ const EventStats = styled.div`
 
 const EventStartTime = styled.h2`
   font-size: 1.5rem;
-  font-style: italic;
   font-weight: 400;
   margin: 0 0 0.5rem;
 `;

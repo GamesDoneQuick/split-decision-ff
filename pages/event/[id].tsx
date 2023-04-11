@@ -9,7 +9,7 @@ import { prisma } from '../../utils/db';
 import { SubmissionList } from '../../components/SubmissionList';
 import { prepareRecordForTransfer, SubmissionWithCategoriesAndUsername } from '../../utils/models';
 import { SiteConfig } from '../../utils/siteConfig';
-import { Label, TextInput } from '../../components/layout';
+import { FormItem, Label, TextInput } from '../../components/layout';
 import { EventHeader } from '../../components/EventHeader';
 
 interface EventDetailsProps {
@@ -55,13 +55,14 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions }) => {
             id="filterInput"
             value={filterValue}
             onChange={handleUpdateFilterValue}
-            placeholder="Filter submissions..."
+            placeholder="Enter a game, runner, or category"
           />
         </FilterContainer>
       </WelcomeMessageContainer>
       <SubmissionListContainer>
         <SubmissionList submissions={filteredSubmissions} showUsernames />
       </SubmissionListContainer>
+      <SubmissionTotal>Showing {filteredSubmissions.length} of {submissions.length} submission{submissions.length !== 1 && 's'}</SubmissionTotal>
     </Container>
   );
 };
@@ -112,7 +113,7 @@ export async function getServerSideProps(context: NextPageContext) {
 
 const Container = styled.div`
   display: flex;
-  max-height: 100%;
+  height: 100%;
   flex-direction: column;
   color: #fff;
   font-weight: 400;
@@ -132,10 +133,22 @@ const EventHeaderContainer = styled.div`
 
 const SubmissionListContainer = styled.div`
   overflow-y: auto;
+  flex-grow: 1;
+  min-height: 0;
+  align-self: stretch;
 `;
 
-const FilterContainer = styled.div`
+const FilterContainer = styled(FormItem)`
   background-color: ${SiteConfig.colors.accents.separator};
   color: ${SiteConfig.colors.text.dark};
-  padding: 1rem 1rem 1.5rem;
+  padding: 1rem 1rem 1rem;
+`;
+
+const SubmissionTotal = styled.div`
+  font-size: 1.25rem;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  margin-top: auto;
+  background-color: ${SiteConfig.colors.accents.separator};
+  color: ${SiteConfig.colors.text.dark};
 `;
