@@ -42,7 +42,7 @@ const Container = styled.div`
 
 const Tab = styled(Button)<{ isActive: boolean }>`
   background-color: ${({ isActive }) => isActive ? SiteConfig.colors.accents.separator : 'transparent'};
-  color: ${({ isActive }) => isActive ? SiteConfig.colors.text.dark : SiteConfig.colors.text.light};
+  color: ${SiteConfig.colors.text.light};
   border-radius: 0;
   text-align: right;
   padding: 1.5rem 1rem 1.5rem 2.5rem;

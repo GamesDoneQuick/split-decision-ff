@@ -140,7 +140,7 @@ const SubmissionListContainer = styled.div`
 
 const FilterContainer = styled(FormItem)`
   background-color: ${SiteConfig.colors.accents.separator};
-  color: ${SiteConfig.colors.text.dark};
+  color: ${SiteConfig.colors.text.light};
   padding: 1rem 1rem 1rem;
 `;
 
@@ -150,5 +150,5 @@ const SubmissionTotal = styled.div`
   padding: 0.5rem 1rem;
   margin-top: auto;
   background-color: ${SiteConfig.colors.accents.separator};
-  color: ${SiteConfig.colors.text.dark};
+  color: ${SiteConfig.colors.text.light};
 `;

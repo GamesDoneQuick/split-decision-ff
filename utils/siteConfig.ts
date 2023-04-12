@@ -54,7 +54,7 @@ const DEFAULT_CONFIG: SiteConfiguration = {
     accents: {
       control: '#BF7AA0',
       eventItem: '#F2EB85',
-      separator: '#F2BB77',
+      separator: '#302447',
       alert: '#D4DFF2',
       link: '#ACCBFF',
       linkDark: '#3E5A8A',
@@ -65,7 +65,7 @@ const DEFAULT_CONFIG: SiteConfiguration = {
     },
     text: {
       primary: '#B5B5B5',
-      light: '#E0E0E0',
+      light: '#fff',
       dark: '#000',
       darkLabel: '#555',
     },

@@ -291,7 +291,7 @@ const ScheduleSelectorContainer = styled.div`
   flex-direction: column;
   padding: 1rem;
   background-color: ${SiteConfig.colors.accents.separator};
-  color: ${SiteConfig.colors.text.dark};
+  color: ${SiteConfig.colors.text.light};
 `;
 
 // const SelectorTime = styled.div`
@@ -345,5 +345,5 @@ const ContentColumn = styled.div`
   flex-grow: 1;
   align-self: stretch;
   background-color: ${SiteConfig.colors.accents.separator};
-  color: ${SiteConfig.colors.text.dark};
+  color: ${SiteConfig.colors.text.light};
 `;

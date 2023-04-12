@@ -198,7 +198,7 @@ const UserSubmissions = styled.div`
 
   &:nth-of-type(2n) {
     background-color: ${SiteConfig.colors.accents.separator};
-    color: ${SiteConfig.colors.text.dark};
+    color: ${SiteConfig.colors.text.light};
   }
 `;
 
