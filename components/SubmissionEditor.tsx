@@ -2,21 +2,12 @@ import { Event, GameSubmissionCategory, RunStatus } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { useSaveable } from '../utils/hooks';
+import { POST_SAVE_OPTS, useSaveable } from '../utils/hooks';
 import { SubmissionWithCategories } from '../utils/models';
 import { SiteConfig } from '../utils/siteConfig';
 import { useValidatedState, ValidationSchemas } from '../utils/validation';
 import { CategoryEditor } from './CategoryEditor';
 import { Button, FormItem, Label, TextInput, Alert, TextAreaInput, SelectInput, ToggleSwitch } from './layout';
-
-const SAVE_OPTS = {
-  requestOptions: {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  },
-};
 
 interface SubmissionEditorProps {
   event: Event,
@@ -30,12 +21,12 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
   const [validatedSubmission, setSubmissionField] = useValidatedState(submission, ValidationSchemas.GameSubmission);
 
   const handleDelete = useCallback(() => {
-    fetch(`/api/submissions/${submission.id}`, {
+    fetch(`/api/events/${eventRecord.id}/submissions/${submission.id}`, {
       method: 'DELETE',
     });
 
     onDelete(submission.id);
-  }, [onDelete, submission.id]);
+  }, [onDelete, submission.id, eventRecord.id]);
 
   const handleUpdateGameTitle = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setSubmissionField('gameTitle', event.target.value);
@@ -101,7 +92,7 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
     setSubmissionField('categories', validatedSubmission.value.categories.filter((category, idx) => idx !== index));
   }, [validatedSubmission.value, setSubmissionField]);
 
-  const [save, isSaving, saveError] = useSaveable<SubmissionWithCategories, SubmissionWithCategories>(`/api/submissions/${eventRecord.id}`, !validatedSubmission.error, SAVE_OPTS);
+  const [save, isSaving, saveError] = useSaveable<SubmissionWithCategories, SubmissionWithCategories>(`/api/events/${eventRecord.id}/submissions`, !validatedSubmission.error, POST_SAVE_OPTS);
   
   const handleSave = useCallback(async () => {
     const response = await save(validatedSubmission.value);
@@ -175,7 +166,6 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
           error={validatedSubmission.error?.secondaryGenre}
           onChange={handleUpdateSecondaryGenre}
           helpText="If more than two genres apply to this submission, pick the two that best represent it."
-          dark
         >
           <option value="">(None)</option>
           {eventRecord.genres.map(option => (
@@ -223,7 +213,6 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
           maxLength={1000}
           onChange={handleUpdateTechnicalNotes}
           helpText={`Technical notes are not shown on the public submission list, and are only used by the ${SiteConfig.organizationName} production team.`}
-          dark
         />
       </FormItem>
       <Separator />

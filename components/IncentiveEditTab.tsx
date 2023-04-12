@@ -87,9 +87,13 @@ export const IncentiveEditTab: React.FC<IncentiveEditTabProps> = ({ event, submi
   }, [allIncentives, onChange]);
 
   const handleIncentiveDelete = useCallback((id: string) => {
+    fetch(`/api/events/${event.id}/incentives/${id}`, {
+      method: 'DELETE',
+    });
+
     setActiveIncentive(null);
     onChange(allIncentives.filter(item => item.id !== id));
-  }, [allIncentives, onChange]);
+  }, [allIncentives, onChange, event.id]);
   
   const remainingIncentives = event.maxIncentives - selectedIncentives.length;
 
@@ -112,6 +116,7 @@ export const IncentiveEditTab: React.FC<IncentiveEditTabProps> = ({ event, submi
               onChange={handleSelectSubmission}
               formatOptionLabel={item => item.gameTitle}
               getOptionValue={item => item.gameTitle}
+              classNamePrefix="submission-select"
               isClearable={false}
               value={selectedSubmission}
               placeholder="Select a submission."
@@ -210,6 +215,10 @@ const ExistingSubmissionsList = styled.ul`
 
   & > li + li {
     margin-top: 1rem;
+  }
+
+  & .submission-select__option {
+    color: ${SiteConfig.colors.text.dark};
   }
 `;
 

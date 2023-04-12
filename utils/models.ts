@@ -1,22 +1,41 @@
-import { User, Event, GameSubmission, GameSubmissionCategory, VettingInfo, RunIncentive, IncentivesOnCategories } from '@prisma/client';
+import { Event, RunIncentive, Prisma } from '@prisma/client';
 import { IncomingMessage, ServerResponse } from 'http';
 // eslint-disable-next-line camelcase
 import { unstable_getServerSession } from 'next-auth';
-import { prisma } from './db';
 import { authOptions } from '../pages/api/auth/[...nextauth]';
 
-export type UserWithVettingInfo = User & { vettingInfo?: VettingInfo | null };
+export type UserWithVettingInfo = Prisma.UserGetPayload<{ include: { vettingInfo: true } }>;
 
-export type SubmissionWithCategories = GameSubmission & { categories: GameSubmissionCategory[] };
-
-export type SubmissionWithCategoriesAndUsername = SubmissionWithCategories & {
-  user: string | null,
+export type PublicUserData = { id: string; name: string | null; };
+export type EventWithCommitteeMemberIdsAndNames = Event & {
+  committeeMembers: PublicUserData[];
 };
 
-export type IncentiveWithCategories = RunIncentive & { attachedCategories: IncentivesOnCategories[] };
+export type SubmissionWithCategories = Prisma.GameSubmissionGetPayload<{ include: { categories: true } }>;
+
+export type SubmissionWithCategoriesAndUsername = Prisma.GameSubmissionGetPayload<{
+  include: {
+    categories: true,
+    user: true,
+  },
+}>;
+
+export type CommitteeVisibleSubmission = Prisma.GameSubmissionGetPayload<{
+  include: {
+    categories: true,
+    user: true,
+    incentives: {
+      include: {
+        attachedCategories: true,
+      },
+    },
+  },
+}>;
+
+export type IncentiveWithCategories = Prisma.RunIncentiveGetPayload<{ include: { attachedCategories: true } }>;
 export type IncentiveWithCategoryIds = RunIncentive & { attachedCategories: string[] };
 
-export type EventWithStringDates = Omit<Event, 'gameSubmissionPeriodStart' | 'gameSubmissionPeriodEnd' | 'incentiveSubmissionPeriodEnd' | 'eventStart'> & {
+export type EventWithStringDates<T extends Event = Event> = Omit<T, 'gameSubmissionPeriodStart' | 'gameSubmissionPeriodEnd' | 'incentiveSubmissionPeriodEnd' | 'eventStart'> & {
   gameSubmissionPeriodStart: string;
   gameSubmissionPeriodEnd: string;
   incentiveSubmissionPeriodEnd: string;
@@ -54,21 +73,6 @@ export function prepareUserForTransfer(user: UserWithVettingInfo | null | undefi
     ...prepareRecordForTransfer(user),
     vettingInfo: user.vettingInfo ? prepareRecordForTransfer(user.vettingInfo) : null,
   };
-}
-
-export async function fetchUserWithVettingInfo(req: IncomingMessage | undefined, res: ServerResponse<IncomingMessage> | undefined) {
-  const session = await fetchServerSession(req, res);
-
-  if (!session) return null;
-
-  return prisma?.user.findFirst({
-    where: {
-      id: session.user.id,
-    },
-    include: {
-      vettingInfo: true,
-    },
-  });
 }
 
 export async function fetchServerSession(req: IncomingMessage | undefined, res: ServerResponse<IncomingMessage> | undefined) {

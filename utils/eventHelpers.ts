@@ -1,5 +1,6 @@
-import { Event } from '@prisma/client';
+import { Event, User } from '@prisma/client';
 import { isAfter, isBefore, parseISO } from 'date-fns';
+import { EventWithCommitteeMemberIdsAndNames } from './models';
 
 export function forceAsDate(value: string | Date): Date {
   if (typeof value === 'string') return parseISO((value as unknown) as string);
@@ -40,4 +41,8 @@ export function areSubmissionsOpen(event: Event): boolean {
 
 export function areIncentivesOpen(event: Event): boolean {
   return !isBeforeSubmissionPeriod(event) && !isAfterIncentivePeriod(event);
+}
+
+export function isMemberOfCommittee(event: EventWithCommitteeMemberIdsAndNames, user: User): boolean {
+  return event.committeeMembers.some(member => member.id === user.id);
 }

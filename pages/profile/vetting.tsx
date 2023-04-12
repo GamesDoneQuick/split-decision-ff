@@ -7,8 +7,9 @@ import { unstable_getServerSession } from 'next-auth';
 import Link from 'next/link';
 import { authOptions } from '../api/auth/[...nextauth]';
 import { SiteConfig } from '../../utils/siteConfig';
-import { fetchUserWithVettingInfo, prepareUserForTransfer, UserWithVettingInfo } from '../../utils/models';
+import { prepareUserForTransfer, UserWithVettingInfo } from '../../utils/models';
 import { VettingEditor } from '../../components/VettingEditor';
+import { fetchUserWithVettingInfo } from '../../utils/dbHelpers';
 
 interface VettingPageProps {
   user: UserWithVettingInfo;

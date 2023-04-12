@@ -45,6 +45,10 @@ export const FormItem = styled.div`
   & + & {
     margin-top: 0.75rem;
   }
+
+  & .selector__option {
+    color: ${SiteConfig.colors.text.dark};
+  }
 `;
 
 export const Label = styled.label`
@@ -86,6 +90,10 @@ const SelectInputControl = styled.select<{ hasError: boolean }>`
   border: 1px solid ${({ hasError }) => hasError ? SiteConfig.colors.error.text : SiteConfig.colors.accents.control};
   border-radius: 0.25rem;
   padding: 0.5rem;
+
+  &:disabled {
+    opacity: 0.5;
+  }
 `;
 
 export const InputError = styled.p`

@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 
+export const POST_SAVE_OPTS = {
+  requestOptions: {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  },
+};
 interface IsSaveableOptions<T> {
   requestOptions?: RequestInit;
   formatBody?: (value: T) => Record<string, unknown>;

@@ -3,20 +3,11 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import Select from 'react-select';
 import { GameSubmissionCategory } from '@prisma/client';
-import { useSaveable } from '../utils/hooks';
+import { POST_SAVE_OPTS, useSaveable } from '../utils/hooks';
 import { IncentiveWithCategories, IncentiveWithCategoryIds, SubmissionWithCategories } from '../utils/models';
 import { SiteConfig } from '../utils/siteConfig';
 import { useValidatedState, ValidationSchemas } from '../utils/validation';
 import { Alert, Button, FormItem, HelpText, InputError, Label, TextAreaInput, TextInput } from './layout';
-
-const SAVE_OPTS = {
-  requestOptions: {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  },
-};
 
 function mapCategories(submission: SubmissionWithCategories, categoryIds: string[]): GameSubmissionCategory[] {
   return categoryIds
@@ -63,7 +54,7 @@ export const IncentiveEditor: React.FC<IncentiveEditorProps> = ({ submission, in
     setIncentiveField('attachedCategories', categoryIds);
   }, [setIncentiveField]);
   
-  const [save, isSaving, saveError] = useSaveable<IncentiveWithCategoryIds, IncentiveWithCategories>('/api/submissions/incentives', !validatedIncentive.error, SAVE_OPTS);
+  const [save, isSaving, saveError] = useSaveable<IncentiveWithCategoryIds, IncentiveWithCategories>(`/api/events/${submission.eventId}/incentives`, !validatedIncentive.error, POST_SAVE_OPTS);
   
   const handleSave = useCallback(async () => {
     const response = await save(validatedIncentive.value);
@@ -78,6 +69,16 @@ export const IncentiveEditor: React.FC<IncentiveEditorProps> = ({ submission, in
       {saveError.error && (
         <Alert variant="error">{saveError.message}</Alert>
       )}
+      <IncentiveInstructions>
+        <strong>Game:</strong>&nbsp;{submission.gameTitle}
+        {incentive.id && (
+          <TitleActions>
+            <DeleteIncentiveButton onClick={() => onDelete(validatedIncentive.value.id)}>
+              Delete
+            </DeleteIncentiveButton>
+          </TitleActions>
+        )}
+      </IncentiveInstructions>
       <FormItem>
         <Label htmlFor="name">Name</Label>
         <TextInput
@@ -99,6 +100,7 @@ export const IncentiveEditor: React.FC<IncentiveEditorProps> = ({ submission, in
           maxLength={2048}
           onChange={handleUpdateVideoURL}
         />
+        <HelpText>Videos are required for incentives that involve extra game content not shown in the submission video.</HelpText>
       </FormItem>
       <FormItem>
         <Label htmlFor="estimate">Estimate</Label>
@@ -110,6 +112,7 @@ export const IncentiveEditor: React.FC<IncentiveEditorProps> = ({ submission, in
           maxLength={8}
           onChange={handleUpdateEstimate}
         />
+        <HelpText>If this estimate does not add any time to the run, put 00:00.</HelpText>
       </FormItem>
       <FormItem>
         <Label htmlFor="closeTime">Incentive Deadline</Label>
@@ -121,7 +124,7 @@ export const IncentiveEditor: React.FC<IncentiveEditorProps> = ({ submission, in
           maxLength={500}
           onChange={handleUpdateCloseTime}
         />
-        <HelpText dark>The point during the run where the games committee needs to close the incentive.</HelpText>
+        <HelpText>The point during the run where the games committee needs to close the incentive.</HelpText>
       </FormItem>
       <FormItem>
         <Label htmlFor="description">Description</Label>
@@ -140,6 +143,7 @@ export const IncentiveEditor: React.FC<IncentiveEditorProps> = ({ submission, in
           options={submission.categories}
           onChange={handleUpdateCategories}
           value={selectedCategories}
+          classNamePrefix="selector"
           formatOptionLabel={option => option.categoryName}
           getOptionValue={option => option.categoryName}
           isMulti
@@ -148,13 +152,13 @@ export const IncentiveEditor: React.FC<IncentiveEditorProps> = ({ submission, in
       </FormItem>
       <FormItemWithDivider>
         <Button onClick={handleSave} disabled={isSaving || !!validatedIncentive.error}>Save</Button>
-        <DeleteCategoryButton variant="danger" onClick={() => onDelete(validatedIncentive.value.id)}>Delete</DeleteCategoryButton>
       </FormItemWithDivider>
     </CategoryContainer>
   );
 };
 
 const CategoryContainer = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
 
@@ -165,15 +169,32 @@ const CategoryContainer = styled.div`
   }
 `;
 
-const DeleteCategoryButton = styled(Button)`
-  width: unset;
-  margin-left: auto;
-  margin-top: 0.5rem;
-  font-size: 1.25rem;
-`;
-
 const FormItemWithDivider = styled(FormItem)`
   border-top: 1px solid ${SiteConfig.colors.accents.separator};
   padding-top: 1rem;
   margin-top: 1rem;
+`;
+
+const IncentiveInstructions = styled.div`
+  position: sticky;
+  display: flex;
+  align-items: center;
+  top: -0.5rem;
+  width: calc(100% + 2rem);
+  font-size: 1.25rem;
+  margin: -0.5rem -1rem 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: ${SiteConfig.colors.accents.separator};
+  border-bottom: 1px solid ${SiteConfig.colors.primary};
+`;
+
+const TitleActions = styled.div`
+  margin-left: auto;
+`;
+
+const DeleteIncentiveButton = styled(Button)`
+  width: unset;
+  margin-left: auto;
+  font-size: 1.25rem;
+  margin: 0;
 `;

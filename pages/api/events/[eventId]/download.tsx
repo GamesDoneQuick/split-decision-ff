@@ -5,6 +5,8 @@ import { Parser } from 'json2csv';
 import { format, utcToZonedTime } from 'date-fns-tz';
 import { prisma } from '../../../../utils/db';
 import { authOptions } from '../../auth/[...nextauth]';
+import { isMemberOfCommittee } from '../../../../utils/eventHelpers';
+import { handleAPIRoute } from '../../../../utils/apiUtils';
 
 interface DateSegment {
   date: string;
@@ -65,44 +67,27 @@ function normalizeEstimate(estimate: string): string {
 }
 
 export default async function handle(req: Request, res: Response) {
-  if (req.method === 'GET') {
-    try {
+  await handleAPIRoute(req, res, {
+    GET: async () => {
       const session = await unstable_getServerSession(req, res, authOptions);
 
-      if (!session) {
-        res.status(401).json({ message: 'You must be logged in.' });
-  
-        return;
-      }
+      if (!session) return res.status(401).json({ message: 'You must be logged in.' });
 
-      if (!session.user.isAdmin) {
-        res.status(401).json({ message: 'You are not an administrator.' });
-  
-        return;
-      }
-      
-      if (!req.query.id) {
-        res.status(400).json({ message: 'Event ID is required' });
-  
-        return;
-      }
+      if (!req.query.eventId) return res.status(400).json({ message: 'Event ID is required' });
        
       // Get existing record and ensure that it belongs to this user.
       const event = await prisma.event.findFirst({
-        where: { id: req.query.id as string },
+        where: { id: req.query.eventId as string },
+        include: {
+          committeeMembers: true,
+        },
       });
 
       if (!event) {
-        res.status(400).json({ message: 'This event no longer exists; please refresh the page and try again.' });
-
-        return;
+        return res.status(400).json({ message: 'This event no longer exists; please refresh the page and try again.' });
       }
 
-      if (!event) {
-        res.status(400).json({ message: 'Event does not exist.' });
-  
-        return;
-      }
+      if (!session.user.isAdmin && !isMemberOfCommittee(event, session.user)) return res.status(404);
 
       const submissions = await prisma.gameSubmission.findMany({
         where: {
@@ -206,14 +191,7 @@ export default async function handle(req: Request, res: Response) {
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader('Content-Disposition', `attachment; filename=${event.eventName}.csv`);
 
-      res.send(csv);
-    } catch (e) {
-      console.error('Error downloading event submissions (GET api/[id]/download]):');
-      console.error(e);
-
-      res.status(500).json({ message: 'An unexpected error occurred. Please try again later.' });
-    }
-  } else {
-    res.status(400).json({ message: 'Unsupported method.' });
-  }
+      return res.send(csv);
+    },
+  });
 }

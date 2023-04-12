@@ -55,6 +55,7 @@ model User {
   gameSubmissions     GameSubmission[]
   eventAvailabilities EventAvailability[]
   vettingInfo         VettingInfo?
+  committees          Event[]
 }
 
 model VerificationToken {
@@ -96,6 +97,7 @@ model Event {
   genres                    String[]            @default([])
   gameSubmissions           GameSubmission[]
   eventAvailabilities       EventAvailability[]
+  committeeMembers          User[]
   createdAt                 DateTime?           @default(now())
   updatedAt                 DateTime?           @updatedAt
 }
@@ -149,7 +151,7 @@ model GameSubmissionCategory {
 }
 
 enum RunStatus {
-  Accpeted
+  Accepted
   Rejected
   Backup
   Bonus

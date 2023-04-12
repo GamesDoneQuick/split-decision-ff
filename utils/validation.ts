@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { GameSubmission, GameSubmissionCategory, RunIncentive, User, VettingInfo } from '@prisma/client';
 import Joi from 'joi';
-import { EventWithStringDates, IncentiveWithCategoryIds } from './models';
+import { EventWithCommitteeMemberIdsAndNames, EventWithStringDates, IncentiveWithCategoryIds } from './models';
 
 const TIMESTAMP_REGEX = /^(?:(?:([0-9]*?\d|2[0-9]):)?([0-5]\d):)?([0-5]\d)$/;
 
@@ -30,7 +30,7 @@ const IncentiveValidationSchemaRules = {
     'string.empty': 'Incentive name is required.',
     'string.max': 'Incentive name cannot be longer than 100 characters.',
   }),
-  videoURL: Joi.string().required().uri().max(2048).messages({
+  videoURL: Joi.string().allow('').uri().max(2048).messages({
     'string.empty': 'Video link is required.',
     'string.uri': 'Video link must be a valid URL.',
     'string.max': 'Video link cannot be longer than 100 characters.',
@@ -67,7 +67,7 @@ export const ValidationSchemas = {
     twitterAccounts: Joi.string(),
     twitchAccounts: Joi.string(),
   }).unknown(true),
-  Event: Joi.object<EventWithStringDates>({
+  Event: Joi.object<EventWithStringDates<EventWithCommitteeMemberIdsAndNames>>({
     eventName: Joi.string().required().messages({ 'string.empty': 'Event name is required.' }),
     gameSubmissionPeriodStart: Joi.string().required().isoDate().messages({
       'string.empty': 'Submission period start date is required.',
@@ -175,7 +175,7 @@ export function useValidatedState<T extends Record<string, unknown>>(value: T, v
     setState(getValidatedResult(newValue));
   }, [getValidatedResult]);
 
-  const updateField = useCallback((field: keyof T, newValue: T[typeof field]) => {
+  const updateField = useCallback(<U extends keyof T>(field: U, newValue: T[U]) => {
     const updatedValue = {
       ...state.value,
       [field]: newValue,

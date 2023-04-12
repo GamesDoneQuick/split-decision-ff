@@ -1,10 +1,11 @@
-import { Event } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import React, { useCallback, useMemo, useState } from 'react';
+import Async from 'react-select/async';
 import styled from 'styled-components';
-import { EventWithStringDates } from '../utils/models';
+import { User } from '@prisma/client';
+import { EventWithCommitteeMemberIdsAndNames, EventWithStringDates, PublicUserData } from '../utils/models';
 import { forceAsString } from '../utils/eventHelpers';
-import { useSaveable } from '../utils/hooks';
+import { POST_SAVE_OPTS, useSaveable } from '../utils/hooks';
 import { useValidatedState, ValidationSchemas } from '../utils/validation';
 import { Button, FormItem, Label, TextInput, Alert, ToggleSwitch } from './layout';
 import { SiteConfig } from '../utils/siteConfig';
@@ -12,16 +13,18 @@ import { useConfirmationPrompt } from '../utils/ConfirmationPrompt';
 
 const DELETE_PROPMT_MESSAGE = 'Are you sure you want to delete this event? This cannot be undone!';
 
-const SAVE_OPTS = {
-  requestOptions: {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  },
-};
+async function fetchCommitteeOptions(query: string) {
+  const response = await fetch(`/api/user/search?query=${encodeURIComponent(query)}`);
 
-function stringifyEvent(event: Event | EventWithStringDates): EventWithStringDates {
+  return (await response.json()).map((record: User) => ({
+    id: record.id,
+    name: record.name,
+  }));
+}
+
+type NormalizedEditorEvent = EventWithStringDates<EventWithCommitteeMemberIdsAndNames>;
+
+function stringifyEvent(event: EventWithCommitteeMemberIdsAndNames): NormalizedEditorEvent {
   return {
     ...event,
     gameSubmissionPeriodStart: forceAsString(event.gameSubmissionPeriodStart),
@@ -30,10 +33,9 @@ function stringifyEvent(event: Event | EventWithStringDates): EventWithStringDat
     eventStart: forceAsString(event.eventStart),
   };
 }
-
 interface EventEditorProps {
-  event: Event,
-  onSave: (value: EventWithStringDates) => void;
+  event: EventWithCommitteeMemberIdsAndNames,
+  onSave: (value: EventWithStringDates<EventWithCommitteeMemberIdsAndNames>) => void;
   onDelete: (id: string) => void;
 }
 
@@ -41,7 +43,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({ event: eventRecord, on
   const session = useSession();
   const stringifiedEvent = useMemo(() => stringifyEvent(eventRecord), [eventRecord]);
 
-  const [validatedEvent, setEventField] = useValidatedState<EventWithStringDates>(stringifiedEvent, ValidationSchemas.Event);
+  const [validatedEvent, setEventField] = useValidatedState<NormalizedEditorEvent>(stringifiedEvent, ValidationSchemas.Event);
   const [rawGenreList, setRawGenreList] = useState(eventRecord.genres.join(', '));
   const handleDelete = useCallback(() => {
     fetch(`/api/events/${eventRecord.id}`, {
@@ -97,14 +99,18 @@ export const EventEditor: React.FC<EventEditorProps> = ({ event: eventRecord, on
     setEventField('visible', value);
   }, [setEventField]);
 
+  const handleUpdateCommittee = useCallback((value: readonly PublicUserData[]) => {
+    setEventField('committeeMembers', [...value]);
+  }, [setEventField]);
+
   const handleUpdateGenreList = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = event.target.value;
 
     setEventField('genres', newValue.split(',').map(value => value.trim()));
     setRawGenreList(newValue);
   }, [setEventField]);
-  
-  const [save, isSaving, saveError] = useSaveable<EventWithStringDates, EventWithStringDates>('/api/events', !validatedEvent.error, SAVE_OPTS);
+
+  const [save, isSaving, saveError] = useSaveable<NormalizedEditorEvent, EventWithStringDates<EventWithCommitteeMemberIdsAndNames>>('/api/events', !validatedEvent.error, POST_SAVE_OPTS);
   
   const handleSave = useCallback(async () => {
     const response = await save(validatedEvent.value);
@@ -252,6 +258,20 @@ export const EventEditor: React.FC<EventEditorProps> = ({ event: eventRecord, on
           onChange={handleUpdateMaxCategories}
         />
       </FormItem>
+      <CommitteeSearchFormItem>
+        <Label htmlFor="committeeMembers">Committee Members</Label>
+        <Async<PublicUserData, true>
+          id="committeeMembers"
+          cacheOptions
+          loadOptions={fetchCommitteeOptions}
+          getOptionLabel={user => user.name || ''}
+          getOptionValue={user => user.id}
+          value={validatedEvent.value.committeeMembers}
+          classNamePrefix="committee-search"
+          onChange={handleUpdateCommittee}
+          isMulti
+        />
+      </CommitteeSearchFormItem>
       <FormItemWithDivider>
         <Button onClick={handleSave} disabled={isSaving || !!validatedEvent.error}>Save</Button>
       </FormItemWithDivider>
@@ -295,5 +315,11 @@ const EventAction = styled(Button)`
 const EventLink = styled.a`
   & + ${EventAction} {
     margin-left: 0.5rem;
+  }
+`;
+
+const CommitteeSearchFormItem = styled(FormItem)`
+  & .committee-search__option {
+    color: ${SiteConfig.colors.text.dark};
   }
 `;

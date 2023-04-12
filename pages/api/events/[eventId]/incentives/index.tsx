@@ -1,30 +1,23 @@
 import { Request, Response } from 'express';
 // eslint-disable-next-line camelcase
 import { unstable_getServerSession } from 'next-auth';
-import { prisma } from '../../../../utils/db';
-import { areIncentivesOpen } from '../../../../utils/eventHelpers';
-import { fetchUserWithVettingInfo } from '../../../../utils/models';
-import { ValidationSchemas } from '../../../../utils/validation';
-import { authOptions } from '../../auth/[...nextauth]';
+import { prisma } from '../../../../../utils/db';
+import { areIncentivesOpen } from '../../../../../utils/eventHelpers';
+import { fetchUserWithVettingInfo } from '../../../../../utils/dbHelpers';
+import { ValidationSchemas } from '../../../../../utils/validation';
+import { authOptions } from '../../../auth/[...nextauth]';
+import { handleAPIRoute } from '../../../../../utils/apiUtils';
 
 export default async function handle(req: Request, res: Response) {
-  if (req.method === 'POST') {
-    try {
+  await handleAPIRoute(req, res, {
+    POST: async () => {
       const session = await unstable_getServerSession(req, res, authOptions);
 
-      if (!session) {
-        res.status(401).json({ message: 'You must be logged in.' });
-  
-        return;
-      }
+      if (!session) return res.status(401).json({ message: 'You must be logged in.' });
 
       const user = await fetchUserWithVettingInfo(req, res);
 
-      if (!user?.vettingInfo) {
-        res.status(401).json({ message: 'You cannot submit to an event until you have filled out the vetting form.' });
-
-        return;
-      }
+      if (!user?.vettingInfo) return res.status(401).json({ message: 'You cannot submit to an event until you have filled out the vetting form.' });
       
       const submission = await prisma.gameSubmission.findFirst({
         where: { id: req.body.gameSubmissionId as string },
@@ -33,22 +26,14 @@ export default async function handle(req: Request, res: Response) {
         },
       });
 
-      if (!submission) {
-        res.status(400).json({ message: 'This submission does not exist.' });
-
-        return;
-      }
+      if (!submission) return res.status(400).json({ message: 'This submission does not exist.' });
 
       if (submission.userId !== session.user.id) {
-        res.status(401).json({ message: 'You do not have access to this incentive.' });
-
-        return;
+        return res.status(401).json({ message: 'You do not have access to this incentive.' });
       }
 
       if (!areIncentivesOpen(submission.event)) {
-        res.status(400).json({ message: 'Incentive submissions are not open for this event.' });
-
-        return;
+        return res.status(400).json({ message: 'Incentive submissions are not open for this event.' });
       }
  
       if (req.body.id) {
@@ -61,15 +46,11 @@ export default async function handle(req: Request, res: Response) {
         });
 
         if (!existingRecord) {
-          res.status(400).json({ message: 'This incentive no longer exists; please refresh the page and try again.' });
-
-          return;
+          return res.status(400).json({ message: 'This incentive no longer exists; please refresh the page and try again.' });
         }
 
         if (existingRecord.gameSubmission.userId !== session.user.id) {
-          res.status(401).json({ message: 'You do not have access to this incentive.' });
-
-          return;
+          return res.status(401).json({ message: 'You do not have access to this incentive.' });
         }
       } else {
         // Make sure we're not over the submission limit.
@@ -80,9 +61,7 @@ export default async function handle(req: Request, res: Response) {
         });
         
         if (existingIncentiveForRun >= submission.event.maxIncentives) {
-          res.status(400).json({ message: `You cannot submit more than ${submission.event.maxIncentives} ${submission.event.maxIncentives === 1 ? 'incentive' : 'incentives'} for this run.` });
-
-          return;
+          return res.status(400).json({ message: `You cannot submit more than ${submission.event.maxIncentives} ${submission.event.maxIncentives === 1 ? 'incentive' : 'incentives'} for this run.` });
         }
       }
 
@@ -104,15 +83,11 @@ export default async function handle(req: Request, res: Response) {
       });
 
       if (matchingCategories.length !== req.body.attachedCategories.length) {
-        res.status(400).json({ message: 'One or more categories could not be found.' });
-
-        return;
+        return res.status(400).json({ message: 'One or more categories could not be found.' });
       }
 
       if (matchingCategories.length === 0) {
-        res.status(400).json({ message: 'You must attach this incentive to at least one category.' });
-
-        return;
+        return res.status(400).json({ message: 'You must attach this incentive to at least one category.' });
       }
 
       const categoryConnections = matchingCategories.map(item => ({
@@ -123,11 +98,7 @@ export default async function handle(req: Request, res: Response) {
 
       const validation = ValidationSchemas.RunIncentive.validate(editableData);
 
-      if (validation.error) {
-        res.status(400).json({ message: validation.error.message });
-
-        return;
-      }
+      if (validation.error) return res.status(400).json({ message: validation.error.message });
 
       const result = await prisma.runIncentive.upsert({
         where: {
@@ -154,14 +125,7 @@ export default async function handle(req: Request, res: Response) {
         },
       });
 
-      res.status(200).json(result);
-    } catch (e) {
-      console.error('Error editing incentive (POST api/submissions/incentives):');
-      console.error(e);
-
-      res.status(500).json({ message: 'An unexpected error occurred. Please try again later.' });
-    }
-  } else {
-    res.status(400).json({ message: 'Unsupported method.' });
-  }
+      return res.status(200).json(result);
+    },
+  });
 }

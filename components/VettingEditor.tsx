@@ -3,20 +3,11 @@ import { useSession } from 'next-auth/react';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useRouter } from 'next/router';
-import { useSaveable } from '../utils/hooks';
+import { POST_SAVE_OPTS, useSaveable } from '../utils/hooks';
 import { useValidatedState, ValidationSchemas } from '../utils/validation';
 import { Button, FormItem, Label, TextInput, Alert, HelpText } from './layout';
 import { SiteConfig } from '../utils/siteConfig';
 import { UserWithVettingInfo } from '../utils/models';
-
-const SAVE_OPTS = {
-  requestOptions: {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  },
-};
 
 function createEmptyVettingInfo(): VettingInfo {
   return {
@@ -29,11 +20,11 @@ function createEmptyVettingInfo(): VettingInfo {
   };
 }
 
-interface EventEditorProps {
+interface VettingEditorProps {
   user: UserWithVettingInfo;
 }
 
-export const VettingEditor: React.FC<EventEditorProps> = ({ user }) => {
+export const VettingEditor: React.FC<VettingEditorProps> = ({ user }) => {
   const session = useSession();
   const router = useRouter();
 
@@ -49,7 +40,7 @@ export const VettingEditor: React.FC<EventEditorProps> = ({ user }) => {
     setVettingInfoField('twitchAccounts', event.target.value);
   }, [setVettingInfoField]);
 
-  const [save, isSaving, saveError] = useSaveable<VettingInfo, VettingInfo>('/api/user/vetting', !validatedVettingInfo.error, SAVE_OPTS);
+  const [save, isSaving, saveError] = useSaveable<VettingInfo, VettingInfo>('/api/user/vetting', !validatedVettingInfo.error, POST_SAVE_OPTS);
   
   const handleSave = useCallback(async () => {
     const response = await save(validatedVettingInfo.value);

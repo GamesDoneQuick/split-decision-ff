@@ -1,17 +1,12 @@
 import { User } from '@prisma/client';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
-import { useSaveable } from '../utils/hooks';
+import { POST_SAVE_OPTS, useSaveable } from '../utils/hooks';
 import { useValidatedState, ValidationSchemas } from '../utils/validation';
 import { Button, FormItem, Label, TextInput, ToggleSwitch, Alert, StaticInput } from './layout';
 
 const SAVE_OPTS = {
-  requestOptions: {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  },
+  ...POST_SAVE_OPTS,
   formatBody(value: User) {
     return {
       displayName: value.displayName,

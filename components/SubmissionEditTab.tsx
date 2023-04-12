@@ -7,6 +7,7 @@ import { Alert, Button } from './layout';
 import { SubmissionList } from './SubmissionList';
 import { SiteConfig } from '../utils/siteConfig';
 import { SubmissionEditor } from './SubmissionEditor';
+import { pluralizeWithValue } from '../utils/humanize';
 
 const CONFIRMATION_PROMPT_MESSAGE = 'Are you sure you want to start a new submission? You have not saved this submission and will lose your progress.';
 
@@ -96,7 +97,7 @@ export const SubmissionEditTab: React.FC<SubmissionEditTabProps> = ({ event, sub
                 <ExistingSubmissionButton onClick={() => allowSubmissions && setActiveSubmission(submission)}>
                   <ExistingSubmissionInfo>
                     <ExistingSubmissionTitle>{submission.gameTitle}</ExistingSubmissionTitle>
-                    <ExistingSubmissionCategoryCount>{submission.categories.length} {submission.categories.length === 1 ? 'category' : 'categories'}</ExistingSubmissionCategoryCount>
+                    <ExistingSubmissionCategoryCount>{pluralizeWithValue(submission.categories.length, 'category', 'categories')}</ExistingSubmissionCategoryCount>
                   </ExistingSubmissionInfo>
                 </ExistingSubmissionButton>
               </li>

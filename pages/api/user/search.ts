@@ -7,28 +7,22 @@ import { authOptions } from '../auth/[...nextauth]';
 
 export default async function handle(req: Request, res: Response) {
   await handleAPIRoute(req, res, {
-    POST: async () => {
+    GET: async () => {
       const session = await unstable_getServerSession(req, res, authOptions);
 
       if (!session) return res.status(401).json({ message: 'You must be logged in.' });
+      if (!session.user.isAdmin) return res.status(401).json({ message: 'You are not an administrator.' });
 
-      const editableData = {
-        twitterAccounts: req.body.twitterAccounts,
-        twitchAccounts: req.body.twitchAccounts,
-      };
-
-      await prisma.vettingInfo.upsert({
+      const queryResult = await prisma.user.findMany({
         where: {
-          userId: session.user.id,
-        },
-        update: editableData,
-        create: {
-          ...editableData,
-          userId: session.user.id,
+          name: {
+            contains: req.query.query?.toString(),
+            mode: 'insensitive',
+          },
         },
       });
 
-      return res.status(200).json({ message: 'Vetting info updated.' });
+      return res.status(200).json(queryResult);
     },
   });
 }

@@ -10,13 +10,14 @@ import ScheduleSelector from 'react-schedule-selector';
 import { zonedTimeToUtc, utcToZonedTime } from 'date-fns-tz';
 import { prisma } from '../../utils/db';
 import { areIncentivesOpen, areSubmissionsOpen } from '../../utils/eventHelpers';
-import { fetchServerSession, fetchUserWithVettingInfo, IncentiveWithCategories, prepareRecordForTransfer, prepareSubmissionForTransfer, prepareUserForTransfer, SubmissionWithCategories, UserWithVettingInfo } from '../../utils/models';
+import { fetchServerSession, IncentiveWithCategories, prepareRecordForTransfer, prepareSubmissionForTransfer, prepareUserForTransfer, SubmissionWithCategories, UserWithVettingInfo } from '../../utils/models';
 import { SiteConfig } from '../../utils/siteConfig';
 import { VettingInfoAlert } from '../../components/VettingInfoAlert';
 import { TabSidebar } from '../../components/TabSidebar';
 import { SubmissionEditTab } from '../../components/SubmissionEditTab';
 import { IncentiveEditTab } from '../../components/IncentiveEditTab';
 import { EventHeader } from '../../components/EventHeader';
+import { fetchUserWithVettingInfo } from '../../utils/dbHelpers';
 
 const SUBMISSION_TABS_SUBMISSIONS_CLOSED = [
   { value: 'submissions', label: 'Submissions' },

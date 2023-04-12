@@ -1,97 +1,223 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { Alert } from './layout';
-import { SubmissionWithCategories } from '../utils/models';
+import { GameSubmission, GameSubmissionCategory, RunStatus } from '@prisma/client';
+import { Alert, Button, SelectInput } from './layout';
+import { CommitteeVisibleSubmission, IncentiveWithCategories, SubmissionWithCategories, SubmissionWithCategoriesAndUsername } from '../utils/models';
 import { SiteConfig } from '../utils/siteConfig';
+import { getUserName } from '../utils/userHelpers';
+import { pluralize, pluralizeWithValue } from '../utils/humanize';
+import { POST_SAVE_OPTS, useSaveable } from '../utils/hooks';
 
-type SubmissionWithCategoriesAndPossibleUsername = SubmissionWithCategories & {
-  user?: string | null;
+const RUN_STATUS_OPTIONS = [
+  RunStatus.Accepted,
+  RunStatus.Backup,
+  RunStatus.Bonus,
+  RunStatus.Pending,
+  RunStatus.Rejected,
+];
+
+type SubmissionRecord = SubmissionWithCategories | SubmissionWithCategoriesAndUsername | CommitteeVisibleSubmission;
+
+interface CategoryRowProps {
+  submission: GameSubmission,
+  category: GameSubmissionCategory;
+  incentives: IncentiveWithCategories[];
+  isCommitteeMember: boolean;
+}
+
+const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incentives, isCommitteeMember }) => {
+  const [showIncentives, setShowIncentives] = useState(false);
+
+  const handleToggleShowIncentives = useCallback(() => setShowIncentives(!showIncentives), [showIncentives]);
+  const [runStatus, setRunStatus] = useState(category.runStatus);
+
+  const [save, isSaving, saveError] = useSaveable<{ status: string }, string>(`/api/events/${submission.eventId}/categories/${category.id}/status`, true, POST_SAVE_OPTS);
+
+  const handleChangeStatus = useCallback(async (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setRunStatus(event.target.value as RunStatus);
+
+    await save({ status: event.target.value });
+  }, [save]);
+
+  return (
+    <tr key={category.id}>
+      <td width="15%">
+        <VideoLink href={category.videoURL} target="_blank" rel="noopener noreferrer">
+          {category.categoryName}
+        </VideoLink>
+      </td>
+      <NumericCell width="10%">{category.estimate}</NumericCell>
+      <DescriptionCell>
+        {category.description}
+
+        {isCommitteeMember && (
+          <IncentiveDrawer>
+            <IncentiveDrawerHead>
+              <strong>{pluralizeWithValue(incentives.length, 'incentive')}</strong>
+              <ShowIncentivesButton onClick={handleToggleShowIncentives}>
+                {showIncentives ? 'Hide' : 'Show'}
+              </ShowIncentivesButton>
+            </IncentiveDrawerHead>
+            {showIncentives && (
+              <IncentiveList>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Estimate</th>
+                      <th>Deadline</th>
+                      <th>Description</th>
+                      {/* <th>Status</th> */}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {incentives.map(incentive => (
+                      <tr key={incentive.id}>
+                        <td width="15%">
+                          {incentive.videoURL ? (
+                            <VideoLink href={incentive.videoURL} target="_blank" rel="noopener noreferrer">
+                              {incentive.name}
+                            </VideoLink>
+                          ) : incentive.name}
+                        </td>
+                        <td width="10%">{incentive.estimate}</td>
+                        <td width="20%">{incentive.closeTime}</td>
+                        <td>
+                          {incentive.description}
+
+                          {incentive.attachedCategories.length > 1 && (
+                            <p>
+                              <em>
+                                <span>Also on {incentive.attachedCategories.length - 1}&nbsp;</span>
+                                <span>other {pluralize(incentive.attachedCategories.length - 1, 'category', 'categories')}.</span>
+                              </em>
+                            </p>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </IncentiveList>
+            )}
+          </IncentiveDrawer>
+        )}
+      </DescriptionCell>
+      {isCommitteeMember && (
+        <td width="10%">
+          <SelectInput disabled={isSaving} value={runStatus} onChange={handleChangeStatus}>
+            {RUN_STATUS_OPTIONS.map(option => (
+              <option value={option}>{option}</option>
+            ))}
+          </SelectInput>
+          {saveError.error && (
+            <Alert variant="error">
+              Could not save status: {saveError.message}
+            </Alert>
+          )}
+        </td>
+      )}
+    </tr>
+  );
+};
+interface SubmissionDetailsProps {
+  submission: SubmissionRecord;
+  isCommitteeMember: boolean;
+}
+
+const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({ submission, isCommitteeMember = false }) => {
+  const incentivesPerCategory = useMemo(() => {
+    if (!isCommitteeMember || !('incentives' in submission)) return {};
+
+    const categoryMapping: Record<string, IncentiveWithCategories[]> = submission.categories.reduce((acc, item) => ({ ...acc, [item.id]: [] }), {});
+
+    return submission.incentives.reduce<Record<string, IncentiveWithCategories[]>>((acc, incentive) => (
+      incentive.attachedCategories.reduce((innerAcc, category) => ({
+        ...innerAcc,
+        [category.categoryId]: [...innerAcc[category.categoryId], incentive],
+      }), acc)
+    ), categoryMapping);
+  }, [submission, isCommitteeMember]);
+
+  return (
+    <SubmissionDetailsContainer>
+      <GameTitle>{submission.gameTitle}</GameTitle>
+      <GameDetailsGridRow>
+        <GameDetails>
+          <GameDetailsKey>Genre</GameDetailsKey>
+          <div>{submission.primaryGenre}</div>
+        </GameDetails>
+        <GameDetails>
+          <GameDetailsKey>Subgenre</GameDetailsKey>
+          <div>{submission.secondaryGenre}</div>
+        </GameDetails>
+        <GameDetails>
+          <GameDetailsKey>Platform</GameDetailsKey>
+          <div>{submission.platform}</div>
+        </GameDetails>
+        <GameDetailsDescription>
+          <GameDetailsKey>Description</GameDetailsKey>
+          <GameDetailsValueWrap>{submission.description}</GameDetailsValueWrap>
+        </GameDetailsDescription>
+      </GameDetailsGridRow>
+      {submission.contentWarning && (
+        <SubmissionWarningRow>
+          <b>Content warning:</b>&nbsp;{submission.contentWarning}
+        </SubmissionWarningRow>
+      )}
+      {submission.flashingLights && (
+        <SubmissionWarningRow>
+          <b>Game contains flashing lights.</b>
+        </SubmissionWarningRow>
+      )}
+      {submission.categories.length === 0 && (
+        <Alert>No categories submitted.</Alert>
+      )}
+      {submission.categories.length > 0 && (
+        <CategoryTable>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Estimate</th>
+              <th>Description</th>
+              {isCommitteeMember && <th>Status</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {submission.categories.map(category => (
+              <CategoryRow
+                key={category.id}
+                submission={submission}
+                category={category}
+                incentives={incentivesPerCategory[category.id] || []}
+                isCommitteeMember={isCommitteeMember}
+              />
+            ))}
+          </tbody>
+        </CategoryTable>
+      )}
+    </SubmissionDetailsContainer>
+  );
 };
 
-interface SubmissionDetailsProps {
-  submission: SubmissionWithCategoriesAndPossibleUsername;
-}
-
-const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({ submission }) => (
-  <SubmissionDetailsContainer>
-    <GameTitle>{submission.gameTitle}</GameTitle>
-    <GameDetailsGridRow>
-      <GameDetails>
-        <GameDetailsKey>Genre</GameDetailsKey>
-        <div>{submission.primaryGenre}</div>
-      </GameDetails>
-      <GameDetails>
-        <GameDetailsKey>Subgenre</GameDetailsKey>
-        <div>{submission.secondaryGenre}</div>
-      </GameDetails>
-      <GameDetails>
-        <GameDetailsKey>Platform</GameDetailsKey>
-        <div>{submission.platform}</div>
-      </GameDetails>
-      <GameDetailsDescription>
-        <GameDetailsKey>Description</GameDetailsKey>
-        <GameDetailsValueWrap>{submission.description}</GameDetailsValueWrap>
-      </GameDetailsDescription>
-    </GameDetailsGridRow>
-    {submission.contentWarning && (
-      <SubmissionWarningRow>
-        <b>Content warning:</b>&nbsp;{submission.contentWarning}
-      </SubmissionWarningRow>
-    )}
-    {submission.flashingLights && (
-      <SubmissionWarningRow>
-        <b>Game contains flashing lights.</b>
-      </SubmissionWarningRow>
-    )}
-    {submission.categories.length === 0 && (
-      <Alert>No categories submitted.</Alert>
-    )}
-    {submission.categories.length > 0 && (
-      <CategoryTable>
-        <thead>
-          <tr>
-            <th>Category</th>
-            <th>Estimate</th>
-            <th>Description</th>
-            {/* <th>Status</th> */}
-          </tr>
-        </thead>
-        <tbody>
-          {submission.categories.map(category => (
-            <tr key={category.id}>
-              <td width="15%">
-                <VideoLink href={category.videoURL} target="_blank" rel="noopener noreferrer">
-                  {category.categoryName}
-                </VideoLink>
-              </td>
-              <NumericCell width="10%">{category.estimate}</NumericCell>
-              <DescriptionCell>{category.description}</DescriptionCell>
-              {/* <td width="10%">{category.runStatus}</td> */}
-            </tr>
-          ))}
-        </tbody>
-      </CategoryTable>
-    )}
-  </SubmissionDetailsContainer>
-);
-
 interface SubmissionListProps {
-  submissions: SubmissionWithCategoriesAndPossibleUsername[];
+  submissions: SubmissionRecord[];
   showUsernames?: boolean;
+  isCommitteeMember?: boolean;
 }
 
-export const SubmissionList: React.FC<SubmissionListProps> = ({ submissions, showUsernames = false }) => {
+export const SubmissionList: React.FC<SubmissionListProps> = ({ submissions, showUsernames = false, isCommitteeMember = false }) => {
   const [groupedUsernames, groupedSubmisisons] = useMemo(() => (
     submissions.reduce(([usernameMapping, submissionMapping], submission) => [
       {
         ...usernameMapping,
-        [submission.userId]: submission.user,
+        [submission.userId]: 'user' in submission ? getUserName(submission.user) : '',
       },
       {
         ...submissionMapping,
         [submission.userId]: [...(submissionMapping[submission.userId] || []), submission],
       },
-    ], [{} as Record<string, string | null | undefined>, {} as Record<string, SubmissionWithCategoriesAndPossibleUsername[]>])
+    ], [{} as Record<string, string | null | undefined>, {} as Record<string, SubmissionRecord[]>])
   ), [submissions]);
 
   return (
@@ -99,7 +225,7 @@ export const SubmissionList: React.FC<SubmissionListProps> = ({ submissions, sho
       {Object.entries(groupedSubmisisons).map(([userId, list]) => (
         <UserSubmissions key={userId}>
           {showUsernames && <Username>{groupedUsernames[userId] ?? userId}</Username>}
-          {list.map(submission => <SubmissionDetails submission={submission} />)}
+          {list.map(submission => <SubmissionDetails submission={submission} isCommitteeMember={isCommitteeMember} />)}
         </UserSubmissions>
       ))}
     </Container>
@@ -216,4 +342,31 @@ const DescriptionCell = styled.td`
 
 const VideoLink = styled.a`
   text-decoration: underline;
+`;
+
+const IncentiveDrawer = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+  background-color: ${SiteConfig.colors.accents.alert};
+  color: ${SiteConfig.colors.text.dark};
+  margin-top: 0.5rem;
+`;
+
+const IncentiveDrawerHead = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
+
+const ShowIncentivesButton = styled(Button)`
+  margin-left: auto;
+`;
+
+const IncentiveList = styled.div`
+  margin-top: 0.5rem;
+
+  & table {
+    width: 100%;
+  }
 `;

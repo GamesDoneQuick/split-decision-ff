@@ -2,7 +2,6 @@ import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import type { NextPage, NextPageContext } from 'next';
 import { useSession } from 'next-auth/react';
-import { Event } from '@prisma/client';
 // eslint-disable-next-line camelcase
 import { unstable_getServerSession } from 'next-auth';
 import Link from 'next/link';
@@ -11,11 +10,11 @@ import { Button } from '../../../components/layout';
 import { EventList } from '../../../components/EventList';
 import { authOptions } from '../../api/auth/[...nextauth]';
 import { EventEditor } from '../../../components/EventEditor';
-import { EventWithStringDates, prepareRecordForTransfer } from '../../../utils/models';
+import { EventWithCommitteeMemberIdsAndNames, EventWithStringDates, prepareRecordForTransfer } from '../../../utils/models';
 import { forceAsDate } from '../../../utils/eventHelpers';
 import { SiteConfig } from '../../../utils/siteConfig';
 
-function createEmptyEvent(): Event {
+function createEmptyEvent(): EventWithCommitteeMemberIdsAndNames {
   return {
     id: '',
     eventName: '',
@@ -32,13 +31,14 @@ function createEmptyEvent(): Event {
     maxCategories: 5,
     maxIncentives: 5,
     genres: [],
+    committeeMembers: [],
     createdAt: null,
     updatedAt: null,
   };
 }
 
 interface EventDetailsProps {
-  events: Event[];
+  events: EventWithCommitteeMemberIdsAndNames[];
 }
 
 const EventDetails: NextPage<EventDetailsProps> = ({ events: eventsFromServer }) => {
@@ -48,13 +48,13 @@ const EventDetails: NextPage<EventDetailsProps> = ({ events: eventsFromServer })
 
   const [events, setEvents] = useState(eventsFromServer);
 
-  const [activeEvent, setActiveEvent] = useState<Event | null>(null);
+  const [activeEvent, setActiveEvent] = useState<EventWithCommitteeMemberIdsAndNames | null>(null);
 
   const handleNewEvent = useCallback(() => {
     setActiveEvent(createEmptyEvent());
   }, []);
 
-  const handleEventSave = useCallback((event: EventWithStringDates) => {
+  const handleEventSave = useCallback((event: EventWithStringDates<EventWithCommitteeMemberIdsAndNames>) => {
     const eventWithDates = {
       ...event,
       gameSubmissionPeriodStart: forceAsDate(event.gameSubmissionPeriodStart),
@@ -63,7 +63,7 @@ const EventDetails: NextPage<EventDetailsProps> = ({ events: eventsFromServer })
       eventStart: forceAsDate(event.eventStart),
     };
 
-    const [updatedList, wasUpdated] = events.reduce<[Event[], boolean]>(([acc, updated], item) => {
+    const [updatedList, wasUpdated] = events.reduce<[EventWithCommitteeMemberIdsAndNames[], boolean]>(([acc, updated], item) => {
       if (item.id === eventWithDates.id) return [[...acc, eventWithDates], true];
 
       return [[...acc, item], updated];
@@ -137,7 +137,7 @@ export async function getServerSideProps(context: NextPageContext) {
     };
   }
 
-  const events = await prisma.event.findMany();
+  const events = await prisma.event.findMany({ include: { committeeMembers: true } });
 
   return {
     props: {
