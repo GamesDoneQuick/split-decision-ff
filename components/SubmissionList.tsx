@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { GameSubmission, GameSubmissionCategory, RunStatus } from '@prisma/client';
-import { Alert, Button, SelectInput } from './layout';
+import { Alert, Badge, Button, SelectInput } from './layout';
 import { CommitteeVisibleSubmission, IncentiveWithCategories, SubmissionWithCategories, SubmissionWithCategoriesAndUsername } from '../utils/models';
 import { SiteConfig } from '../utils/siteConfig';
 import { getUserName } from '../utils/userHelpers';
@@ -45,6 +45,11 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incenti
         <VideoLink href={category.videoURL} target="_blank" rel="noopener noreferrer">
           {category.categoryName}
         </VideoLink>
+        <div>
+          {runStatus !== 'Pending' && (
+            <StatusBadge status={runStatus}>{runStatus}</StatusBadge>
+          )}
+        </div>
       </td>
       <NumericCell width="10%">{category.estimate}</NumericCell>
       <DescriptionCell>
@@ -200,6 +205,11 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({ submission, isCom
   );
 };
 
+interface SubmissionUserData {
+  name: string;
+  visible: boolean;
+}
+
 interface SubmissionListProps {
   submissions: SubmissionRecord[];
   showUsernames?: boolean;
@@ -207,24 +217,34 @@ interface SubmissionListProps {
 }
 
 export const SubmissionList: React.FC<SubmissionListProps> = ({ submissions, showUsernames = false, isCommitteeMember = false }) => {
-  const [groupedUsernames, groupedSubmisisons] = useMemo(() => (
+  const [groupedUsernames, groupedSubmissions] = useMemo(() => (
     submissions.reduce(([usernameMapping, submissionMapping], submission) => [
       {
         ...usernameMapping,
-        [submission.userId]: 'user' in submission ? getUserName(submission.user) : '',
+        [submission.userId]: 'user' in submission ? {
+          name: getUserName(submission.user) || '',
+          visible: submission.user.showSubmissions,
+        } : { name: '', visible: true },
       },
       {
         ...submissionMapping,
         [submission.userId]: [...(submissionMapping[submission.userId] || []), submission],
       },
-    ], [{} as Record<string, string | null | undefined>, {} as Record<string, SubmissionRecord[]>])
+    ], [{} as Record<string, SubmissionUserData>, {} as Record<string, SubmissionRecord[]>])
   ), [submissions]);
 
   return (
     <Container>
-      {Object.entries(groupedSubmisisons).map(([userId, list]) => (
+      {Object.entries(groupedSubmissions).map(([userId, list]) => (
         <UserSubmissions key={userId}>
-          {showUsernames && <Username>{groupedUsernames[userId] ?? userId}</Username>}
+          {showUsernames && (
+            <Username>
+              <span>{groupedUsernames[userId]?.name ?? userId}</span>
+              {!(groupedUsernames[userId]?.visible ?? true) && (
+                <VisibilityBadge>Hidden</VisibilityBadge>
+              )}
+            </Username>
+          )}
           {list.map(submission => <SubmissionDetails submission={submission} isCommitteeMember={isCommitteeMember} />)}
         </UserSubmissions>
       ))}
@@ -315,6 +335,9 @@ const GameDetailsValueWrap = styled.div`
 `;
 
 const Username = styled.h2`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   font-size: 2rem;
   margin: 0 0 1rem 0;
 `;
@@ -369,4 +392,31 @@ const IncentiveList = styled.div`
   & table {
     width: 100%;
   }
+`;
+
+const VisibilityBadge = styled(Badge)`
+  background-color: ${SiteConfig.colors.accents.separator};
+  color: ${SiteConfig.colors.text.light};
+`;
+
+const StatusBadge = styled(Badge)<{ status: RunStatus }>`
+  display: block;
+  margin: 0.5rem 0 0;
+
+  background-color: ${({ status }) => {
+    switch (status) {
+      case 'Accepted':
+      case 'Bonus':
+        return SiteConfig.colors.status.accepted;
+
+      case 'Backup':
+        return SiteConfig.colors.status.backup;
+
+      case 'Rejected':
+        return SiteConfig.colors.status.rejected;
+
+      default:
+        return 'transparent';
+    }
+  }};
 `;

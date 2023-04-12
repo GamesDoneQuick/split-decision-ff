@@ -51,8 +51,14 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
       <WelcomeMessageContainer>
         <EventHeaderContainer>
           <EventHeader event={event} />
-          <CommitteMemberWelcome>
-            You are a committee member. Have fun!
+          <CommitteeMemberWelcome>
+            Committee Toolkit
+            <EventMetadata>
+              <EventMetadataHeader>Event Visibility</EventMetadataHeader>
+              <EventMetadataHeader>Acceptance Statuses</EventMetadataHeader>
+              <div>{event.visible ? 'Hidden' : 'Visible'}</div>
+              <div>{event.runStatusVisible ? 'Hidden' : 'Visible'}</div>
+            </EventMetadata>
             <CommitteeMemberTools>
               <EventLink href={`/api/events/${event.id}/download`} target="_blank" rel="noopener noreferrer">
                 <EventAction>
@@ -60,7 +66,7 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
                 </EventAction>
               </EventLink>
             </CommitteeMemberTools>
-          </CommitteMemberWelcome>
+          </CommitteeMemberWelcome>
         </EventHeaderContainer>
         <FilterContainer>
           <Label htmlFor="filterInput">Filter</Label>
@@ -93,7 +99,7 @@ export async function getServerSideProps(context: NextPageContext) {
     };
   }
 
-  const isCommitteeMember = session && isMemberOfCommittee(event, session.user);
+  const isCommitteeMember = session !== null && isMemberOfCommittee(event, session.user);
 
   const submissions = await prisma.gameSubmission.findMany({
     where: {
@@ -112,7 +118,7 @@ export async function getServerSideProps(context: NextPageContext) {
   
   // Remove other user data and exclude any users that don't want their submissions visible.
   const visibleSubmissions = submissions.reduce((acc, submission) => {
-    if (!submission.user.showSubmissions) return acc;
+    if (!submission.user.showSubmissions && !isCommitteeMember) return acc;
 
     let normalizedSubmission: SubmissionWithCategoriesAndUsername | CommitteeVisibleSubmission = submission;
 
@@ -122,7 +128,7 @@ export async function getServerSideProps(context: NextPageContext) {
         ...submission,
         categories: submission.categories.map(category => ({
           ...category,
-          status: 'Pending',
+          runStatus: 'Pending',
         })),
       };
     }
@@ -189,13 +195,16 @@ const SubmissionTotal = styled.div`
   color: ${SiteConfig.colors.text.light};
 `;
 
-const CommitteMemberWelcome = styled.div`
+const CommitteeMemberWelcome = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
   font-size: 1rem;
   font-weight: 700;
-  margin: 0 0 1rem;
+  margin: 0 -1rem;
+  padding: 0 1rem;
+  background-color: ${SiteConfig.colors.accents.separator};
+  border-bottom: 1px solid ${SiteConfig.colors.primary};
 `;
 
 const CommitteeMemberTools = styled.div`
@@ -217,4 +226,21 @@ const EventLink = styled.a`
   & + ${EventAction} {
     margin-left: 0.5rem;
   }
+`;
+
+const EventMetadata = styled.div`
+  display: grid;
+  margin-left: 2rem;
+  grid-template-columns: repeat(2, max-content);
+
+  & > div {
+    padding: 0.25rem 0.5rem;
+  }
+`;
+
+const EventMetadataHeader = styled.div`
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 0.825rem;
+  margin-bottom: 0.125rem;
 `;

@@ -308,3 +308,13 @@ interface AlertProps {
 export const Alert: React.FC<AlertProps> = ({ children, variant, className }) => (
   <AlertElement className={[variant, className].filter(x => x !== undefined).join(' ')}>{children}</AlertElement>
 );
+
+export const Badge = styled.span`
+  padding: 0.25rem 0.5rem;
+  width: max-content;
+  border-radius: 0.25rem;
+  margin-left: 0.5rem;
+  text-transform: uppercase;
+  font-size: 0.825rem;
+  background-color: ${SiteConfig.colors.primary};
+`;

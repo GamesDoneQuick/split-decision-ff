@@ -38,6 +38,11 @@ interface SiteConfiguration {
     warning: {
       background: string;
       text: string;
+    },
+    status: {
+      accepted: string;
+      rejected: string;
+      backup: string;
     }
   }
 }
@@ -79,6 +84,11 @@ const DEFAULT_CONFIG: SiteConfiguration = {
     warning: {
       background: '#F2BB77',
       text: '#6B3F08',
+    },
+    status: {
+      accepted: '#537334',
+      rejected: '#751114',
+      backup: '#69651F',
     },
   },
 } as const;

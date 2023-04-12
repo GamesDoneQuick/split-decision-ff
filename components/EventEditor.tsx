@@ -99,6 +99,10 @@ export const EventEditor: React.FC<EventEditorProps> = ({ event: eventRecord, on
     setEventField('visible', value);
   }, [setEventField]);
 
+  const handleUpdateRunStatusVisible = useCallback((value: boolean) => {
+    setEventField('runStatusVisible', value);
+  }, [setEventField]);
+
   const handleUpdateCommittee = useCallback((value: readonly PublicUserData[]) => {
     setEventField('committeeMembers', [...value]);
   }, [setEventField]);
@@ -227,6 +231,14 @@ export const EventEditor: React.FC<EventEditorProps> = ({ event: eventRecord, on
           error={validatedEvent.error?.incentiveSubmissionPeriodEnd}
           onChange={handleUpdateIncentivePeriodEnd}
         />
+      </FormItem>
+      <FormItem>
+        <ToggleSwitch
+          toggled={validatedEvent.value.runStatusVisible}
+          onChange={handleUpdateRunStatusVisible}
+        >
+          Publicly Show Acceptance Status
+        </ToggleSwitch>
       </FormItem>
       <FormItem>
         <Label htmlFor="genreList">Genres (comma-separated)</Label>

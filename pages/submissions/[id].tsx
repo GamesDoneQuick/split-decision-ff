@@ -304,7 +304,7 @@ const ScheduleSelectorContainer = styled.div`
 
 const SelectorDate = styled.div`
   text-align: center;
-  color: ${SiteConfig.colors.text.dark};
+  color: ${SiteConfig.colors.text.light};
 `;
 
 const SelectorElement = styled.div<{ selected: boolean }>`

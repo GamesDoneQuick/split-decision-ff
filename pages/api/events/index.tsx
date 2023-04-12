@@ -60,6 +60,7 @@ export default async function handle(req: Request, res: Response) {
         startTime: Number(req.body.startTime),
         endTime: Number(req.body.endTime),
         visible: req.body.visible,
+        runStatusVisible: req.body.runStatusVisible,
         genres: req.body.genres,
         committeeMembers: {
           connect: (req.body.committeeMembers as PublicUserData[]).map(member => ({ id: member.id })),
