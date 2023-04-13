@@ -139,7 +139,7 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
   }, [showBackup, router]);
 
   const handleToggleShowDeclined = useCallback(() => {
-    setShowDeclned(!showDeclined);
+    setShowDeclined(!showDeclined);
     router.replace({
       query: { ...router.query, declined: !showDeclined },
     });

@@ -29,7 +29,7 @@ const VettingPage: NextPage<VettingPageProps> = ({ user }) => {
           <ReturnToProfile>Return to my profile</ReturnToProfile>
         </Link>
         <WelcomeMessage>
-          Vetting Info
+          Runner Info
         </WelcomeMessage>
       </WelcomeMessageContainer>
       <ColumnContainer>

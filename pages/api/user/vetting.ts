@@ -28,7 +28,7 @@ export default async function handle(req: Request, res: Response) {
         },
       });
 
-      return res.status(200).json({ message: 'Vetting info updated.' });
+      return res.status(200).json({ message: 'Runner info updated.' });
     },
   });
 }

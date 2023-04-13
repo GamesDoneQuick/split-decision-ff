@@ -13,10 +13,10 @@ export const VettingInfoAlert: React.FC<VettingInfoAlertProps> = ({ user }) => {
 
   return (
     <Container variant="error">
-      You must fill out the&nbsp;
-      <Link href="/profile/vetting">
+      You must fill out your&nbsp;
+      <Link href="/profile/info">
         <Anchor>
-          vetting profile
+          runner info
         </Anchor>
       </Link>&nbsp;before submitting to Frame Fatales events.
     </Container>

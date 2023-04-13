@@ -14,7 +14,7 @@ export default async function handle(req: Request, res: Response) {
       if (!user) return res.status(401).json({ message: 'You must be logged in.' });
 
       if (!user?.vettingInfo) {
-        return res.status(401).json({ message: 'You cannot submit to an event until you have filled out the vetting form.' });
+        return res.status(401).json({ message: 'You cannot submit to an event until you have filled out the runner info form.' });
       }
       
       let existingCategoryIds: string[] = [];

@@ -39,14 +39,14 @@ const SubmissionsHome: NextPage<SubmissionsHomeProps> = ({ user }) => {
   return (
     <Container>
       <WelcomeMessageContainer>
-        <WelcomeMessage>
+        <Title>
           Hi, {user.displayName || user.name}!
           <UserActions>
-            <Link href="/profile/vetting">
-              <Button>Update Vetting Info</Button>
+            <Link href="/profile/info">
+              <Button>Update Runner Info</Button>
             </Link>
           </UserActions>
-        </WelcomeMessage>
+        </Title>
         <p>
           (Not you? <TextButton onClick={handleSignout}>Click here to log out.</TextButton>)
         </p>
@@ -196,4 +196,8 @@ const UserActions = styled.div`
   @media screen and (max-width: 800px) {
     margin: 0.5rem 0 1rem;
   }
+`;
+
+const Title = styled(WelcomeMessage)`
+  margin-top: 0.5rem;
 `;

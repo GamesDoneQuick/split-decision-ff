@@ -17,7 +17,7 @@ export default async function handle(req: Request, res: Response) {
 
       const user = await fetchUserWithVettingInfo(req, res);
 
-      if (!user?.vettingInfo) return res.status(401).json({ message: 'You cannot submit to an event until you have filled out the vetting form.' });
+      if (!user?.vettingInfo) return res.status(401).json({ message: 'You cannot submit to an event until you have filled out the runner info form.' });
       
       const submission = await prisma.gameSubmission.findFirst({
         where: { id: req.body.gameSubmissionId as string },
