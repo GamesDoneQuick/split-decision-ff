@@ -10,6 +10,7 @@ import { SiteConfig } from '../../utils/siteConfig';
 import { prepareUserForTransfer, UserWithVettingInfo } from '../../utils/models';
 import { VettingEditor } from '../../components/VettingEditor';
 import { fetchUserWithVettingInfo } from '../../utils/dbHelpers';
+import { ReturnToProfile } from '../../components/layout';
 
 interface VettingPageProps {
   user: UserWithVettingInfo;
@@ -83,7 +84,7 @@ const ColumnContainer = styled.div`
 
 const WelcomeMessageContainer = styled.div`
   margin: 0 1rem;
-  border-bottom: 1px solid ${SiteConfig.colors.accents.separator};
+  border-bottom: 1px solid ${SiteConfig.colors.secondary};
   padding-bottom: 0.5rem;
 
   & > p {
@@ -104,16 +105,4 @@ const WelcomeMessage = styled.h1`
   font-size: 3.5rem;
   font-weight: 700;
   margin: 0;
-`;
-
-const ReturnToProfile = styled.a`
-  display: block;
-  color: ${SiteConfig.colors.accents.link};
-  font-size: 1.25rem;
-  margin: 1rem 0;
-
-  &:hover,
-  &:active {
-    color: ${SiteConfig.colors.accents.alert};
-  }
 `;

@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import { unstable_getServerSession } from 'next-auth';
 import Link from 'next/link';
 import { prisma } from '../../../utils/db';
-import { Button } from '../../../components/layout';
+import { Button, ReturnToProfile } from '../../../components/layout';
 import { EventList } from '../../../components/EventList';
 import { authOptions } from '../../api/auth/[...nextauth]';
 import { EventEditor } from '../../../components/EventEditor';
@@ -164,7 +164,7 @@ const ColumnContainer = styled.div`
 
 const WelcomeMessageContainer = styled.div`
   margin: 0 1rem;
-  border-bottom: 1px solid ${SiteConfig.colors.accents.separator};
+  border-bottom: 1px solid ${SiteConfig.colors.secondary};
   padding-bottom: 0.5rem;
 
   & > p {
@@ -184,7 +184,7 @@ const EventColumn = styled.div`
 
   @media screen and (max-width: 500px) {
     max-width: 100%;
-    border-bottom: 1px solid ${SiteConfig.colors.accents.separator};
+    border-bottom: 1px solid ${SiteConfig.colors.secondary};
     padding-bottom: 1rem;
   }
 `;
@@ -201,17 +201,4 @@ const WelcomeMessage = styled.h1`
   font-size: 3.5rem;
   font-weight: 700;
   margin: 0;
-`;
-
-const ReturnToProfile = styled.a`
-  display: block;
-  color: ${SiteConfig.colors.accents.link};
-  font-size: 1.25rem;
-  margin: 1rem 0;
-  cursor: pointer;
-
-  &:hover,
-  &:active {
-    color: ${SiteConfig.colors.accents.alert};
-  }
 `;

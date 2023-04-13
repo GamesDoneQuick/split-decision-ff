@@ -10,17 +10,24 @@ interface SiteConfiguration {
   organizationName: string;
   colors: {
     primary: string;
+    secondary: string;
     accents: {
+      header: string;
       control: string;
       eventItem: string;
-      separator: string;
       alert: string;
       link: string;
       linkDark: string;
       activeTimeslot: string;
       hover: {
         control: string;
+        link: string;
       }
+    },
+    input: {
+      background: string;
+      border: string;
+      text: string;
     },
     text: {
       primary: string;
@@ -55,28 +62,36 @@ const DEFAULT_CONFIG: SiteConfiguration = {
   organizationName: 'My Organization',
   siteDescription: 'The cool and also rad submission site!',
   colors: {
-    primary: '#4C3973',
+    // primary: '#4C3973',
+    primary: '#271E3B', // '#221A34',
+    secondary: '#120c1f',
     accents: {
-      control: '#BF7AA0',
-      eventItem: '#F2EB85',
-      separator: '#302447',
-      alert: '#D4DFF2',
+      header: '#4C3973',
+      control: '#615D87',
+      eventItem: '#DAD478',
+      alert: '#ADA7DE',
       link: '#ACCBFF',
       linkDark: '#3E5A8A',
-      activeTimeslot: '#02DBB4',
+      activeTimeslot: '#28915B',
       hover: {
-        control: '#a7487c',
+        control: '#4C496A',
+        link: '#D1E2FF',
       },
     },
+    input: {
+      background: '#312F45',
+      border: '#5E5B79',
+      text: '#EDEDF0',
+    },
     text: {
-      primary: '#B5B5B5',
+      primary: '#E9E9EB',
       light: '#fff',
       dark: '#000',
       darkLabel: '#555',
     },
     error: {
       background: '#FEECEC',
-      text: '#B13855',
+      text: '#E05B7B',
       dark: {
         background: '#C4244A',
       },

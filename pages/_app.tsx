@@ -62,11 +62,9 @@ function SubmissionsApp({ Component, pageProps }: AppProps) {
           }}
         />
         <Header>
-          <div>
-            <Link href="/">
-              <a>{SiteConfig.siteName || 'Submissions'}</a>
-            </Link>
-          </div>
+          <Link href="/">
+            <a>{SiteConfig.siteName || 'Submissions'}</a>
+          </Link>
           <HeaderActions />
         </Header>
         <PageContent>
@@ -85,15 +83,38 @@ const Container = styled.div`
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
+
+  & .selector__option {
+    color: ${SiteConfig.colors.text.dark};
+  }
+
+  & .selector__control {
+    background-color: ${SiteConfig.colors.input.background};
+    color: ${SiteConfig.colors.input.text};
+    border: 1px solid ${SiteConfig.colors.input.border};
+  }
+
+  & .selector__single-value {
+    color: ${SiteConfig.colors.input.text};
+  }
+
+  & .selector__indicator-separator {
+    background-color: ${SiteConfig.colors.input.border};
+  }
+
+  & .selector__dropdown-indicator svg {
+    color: ${SiteConfig.colors.input.text};
+  }
 `;
 
 const Header = styled.div`
   display: flex;
   padding: 0.5rem 1rem;
-  background-color: ${SiteConfig.colors.accents.link};
+  background-color: ${SiteConfig.colors.accents.header};
+  color: ${SiteConfig.colors.text.light};
   font-size: 1.5rem;
   align-items: center;
-  font-family: 'Josefin Sans';
+  font-family: 'Lexend';
 
   @media screen and (max-width: 500px) {
     a {
@@ -116,5 +137,4 @@ const PageContent = styled.div`
 const LoginButton = styled(Button)`
   font-size: 1rem;
   padding: 0.5rem 1.5rem;
-  line-height: normal;
 `;

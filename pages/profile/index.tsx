@@ -128,7 +128,7 @@ const ColumnContainer = styled.div`
 
 const WelcomeMessageContainer = styled.div`
   margin: 0 1rem;
-  border-bottom: 1px solid ${SiteConfig.colors.accents.separator};
+  border-bottom: 1px solid ${SiteConfig.colors.secondary};
   padding-bottom: 0.5rem;
 
   & > p {
@@ -159,7 +159,7 @@ const SubmissionsColumn = styled.div`
   }
 
   @media screen and (max-width: 500px) {
-    border-bottom: 1px solid ${SiteConfig.colors.accents.separator};
+    border-bottom: 1px solid ${SiteConfig.colors.secondary};
     padding-bottom: 1rem;
   }
 `;

@@ -270,7 +270,7 @@ const CategoryTable = styled.table`
   & th {
     text-align: left;
     background-color: rgba(0, 0, 0, 0.5);
-    color: #fff;
+    background-color: ${SiteConfig.colors.secondary};
   }
 
   & tr:nth-of-type(2n) td {
@@ -283,7 +283,7 @@ const SubmissionDetailsContainer = styled.div`
   flex-direction: column;
 
   & + & {
-    border-top: 1px solid ${SiteConfig.colors.accents.separator};
+    border-top: 1px solid ${SiteConfig.colors.secondary};
     padding-top: 0.5rem;
     margin-top: 0.5rem;
   }
@@ -346,8 +346,8 @@ const UserSubmissions = styled.div`
   padding: 1rem;
 
   &:nth-of-type(2n) {
-    background-color: ${SiteConfig.colors.accents.separator};
-    color: ${SiteConfig.colors.text.light};
+    background-color: ${SiteConfig.colors.secondary};
+    color: ${SiteConfig.colors.text.primary};
   }
 `;
 
@@ -371,8 +371,9 @@ const IncentiveDrawer = styled.div`
   display: flex;
   flex-direction: column;
   padding: 0.5rem;
+  border-radius: 0.25rem;
   background-color: ${SiteConfig.colors.accents.alert};
-  color: ${SiteConfig.colors.text.dark};
+  color: ${SiteConfig.colors.text.primary};
   margin-top: 0.5rem;
 `;
 
@@ -397,7 +398,7 @@ const IncentiveList = styled.div`
 `;
 
 const VisibilityBadge = styled(Badge)`
-  background-color: ${SiteConfig.colors.accents.separator};
+  background-color: ${SiteConfig.colors.secondary};
   color: ${SiteConfig.colors.text.light};
 `;
 
@@ -426,6 +427,6 @@ const StatusBadge = styled(Badge)<{ status: RunStatus }>`
 const StatusSelector = styled(SelectInput)`
   border: none;
   background-color: transparent;
-  color: ${SiteConfig.colors.text.light};
+  color: ${SiteConfig.colors.text.primary};
   padding: 0;
 `;

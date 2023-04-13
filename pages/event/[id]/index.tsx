@@ -171,9 +171,8 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
       />
       <WelcomeMessageContainer>
         <EventHeaderContainer>
-          <EventHeader event={event} />
           {isCommitteeMember && (
-            <CommitteeToolbar event={event} isCommitteeMember={isCommitteeMember} activePage="submissions">
+            <SubmissionCommitteeToolbar event={event} isCommitteeMember={isCommitteeMember} activePage="submissions">
               <EventMetadata>
                 <EventMetadataHeader>Event Visibility</EventMetadataHeader>
                 <EventMetadataHeader>Acceptance Statuses</EventMetadataHeader>
@@ -187,8 +186,9 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
                   </EventAction>
                 </EventLink>
               </CommitteeMemberTools>
-            </CommitteeToolbar>
+            </SubmissionCommitteeToolbar>
           )}
+          <EventHeader event={event} />
         </EventHeaderContainer>
         <FilterContainer>
           <Label htmlFor="filterInput">Filter</Label>
@@ -207,7 +207,7 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
                   options={subcommitteeOptions}
                   value={mappedSubcommitteeValue}
                   onChange={handleChangeSubcommitteeFilters}
-                  classNamePrefix="subcommittee-selector"
+                  classNamePrefix="selector"
                   isMulti
                   placeholder="No subcommittee filter"
                 />
@@ -331,7 +331,7 @@ const Container = styled.div`
   display: flex;
   height: 100%;
   flex-direction: column;
-  color: #fff;
+  color: ${SiteConfig.colors.text.primary};
   font-weight: 400;
   overflow: hidden;
 `;
@@ -344,7 +344,7 @@ const WelcomeMessageContainer = styled.div`
 `;
 
 const EventHeaderContainer = styled.div`
-  padding: 1rem 1rem 0;
+  padding: 0 1rem;
 `;
 
 const SubmissionListContainer = styled.div`
@@ -355,9 +355,10 @@ const SubmissionListContainer = styled.div`
 `;
 
 const FilterContainer = styled(FormItem)`
-  background-color: ${SiteConfig.colors.accents.separator};
-  color: ${SiteConfig.colors.text.light};
+  background-color: ${SiteConfig.colors.secondary};
+  color: ${SiteConfig.colors.text.primary};
   padding: 1rem 1rem 1rem;
+  margin: 1rem 0 0;
 `;
 
 const SubmissionTotal = styled.div`
@@ -365,8 +366,8 @@ const SubmissionTotal = styled.div`
   font-weight: 700;
   padding: 0.5rem 1rem;
   margin-top: auto;
-  background-color: ${SiteConfig.colors.accents.separator};
-  color: ${SiteConfig.colors.text.light};
+  background-color: ${SiteConfig.colors.secondary};
+  color: ${SiteConfig.colors.text.primary};
 `;
 
 const CommitteeMemberTools = styled.div`
@@ -453,8 +454,8 @@ const TextFilterContainer = styled.div`
 const SubcommitteeSelectorContainer = styled.div`
   margin-top: -1px;
   margin-left: 0.5rem;
-  
-  & .subcommittee-selector__option {
-    color: ${SiteConfig.colors.text.dark};
-  }
+`;
+
+const SubmissionCommitteeToolbar = styled(CommitteeToolbar)`
+  margin: 0 -1rem;
 `;

@@ -20,7 +20,7 @@ export const EventHeader: React.FC<EventHeaderProps> = ({ event: eventRecord }) 
   
   return (
     <EventPageTitle>
-      {eventRecord.eventName}
+      <EventName>{eventRecord.eventName}</EventName>
       <EventStats>
         <EventStartTime>Starts on {intlFormat(parseISO((eventRecord.eventStart as unknown) as string))}</EventStartTime>
         <SubmissionCloseTime>{submissionCloseTime}</SubmissionCloseTime>
@@ -47,5 +47,10 @@ const EventStartTime = styled.h2`
 
 const SubmissionCloseTime = styled.h2`
   font-size: 1.75rem;
-  margin: 0.5rem 0;
+  margin: 0.5rem 0 0;
+`;
+
+const EventName = styled.div`
+  position: relative;
+  top: 0.5rem;
 `;

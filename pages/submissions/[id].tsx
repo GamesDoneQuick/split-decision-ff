@@ -9,6 +9,7 @@ import Link from 'next/link';
 import ScheduleSelector from 'react-schedule-selector';
 import { zonedTimeToUtc, utcToZonedTime } from 'date-fns-tz';
 import { prisma } from '../../utils/db';
+import { ReturnToProfile } from '../../components/layout';
 import { areIncentivesOpen, areSubmissionsOpen } from '../../utils/eventHelpers';
 import { fetchServerSession, IncentiveWithCategories, prepareRecordForTransfer, prepareSubmissionForTransfer, prepareUserForTransfer, SubmissionWithCategories, UserWithVettingInfo } from '../../utils/models';
 import { SiteConfig } from '../../utils/siteConfig';
@@ -270,18 +271,6 @@ const WelcomeMessageContainer = styled.div`
   }
 `;
 
-const ReturnToProfile = styled.a`
-  display: block;
-  color: ${SiteConfig.colors.accents.link};
-  font-size: 1.25rem;
-  margin: 1rem 0;
-
-  &:hover,
-  &:active {
-    color: ${SiteConfig.colors.accents.alert};
-  }
-`;
-
 const Title = styled.h2`
   font-weight: 700;
   margin: 0 0 1rem 0;
@@ -291,8 +280,8 @@ const ScheduleSelectorContainer = styled.div`
   display: flex
   flex-direction: column;
   padding: 1rem;
-  background-color: ${SiteConfig.colors.accents.separator};
-  color: ${SiteConfig.colors.text.light};
+  background-color: ${SiteConfig.colors.secondary};
+  color: ${SiteConfig.colors.text.primary};
 `;
 
 // const SelectorTime = styled.div`
@@ -304,7 +293,7 @@ const ScheduleSelectorContainer = styled.div`
 
 const SelectorDate = styled.div`
   text-align: center;
-  color: ${SiteConfig.colors.text.light};
+  color: ${SiteConfig.colors.text.primary};
 `;
 
 const SelectorElement = styled.div<{ selected: boolean }>`
@@ -332,9 +321,9 @@ const MainContent = styled.div`
   height: 100%;
   overflow: hidden;
   flex-grow: 1;
+  border-top: 1px solid ${SiteConfig.colors.secondary};
   
   @media screen and (max-width: 800px) {
-    border-top: 1px solid ${SiteConfig.colors.accents.separator};
     flex-direction: column;
   }
 `;
@@ -345,6 +334,6 @@ const ContentColumn = styled.div`
   min-width: 0;
   flex-grow: 1;
   align-self: stretch;
-  background-color: ${SiteConfig.colors.accents.separator};
-  color: ${SiteConfig.colors.text.light};
+  background-color: ${SiteConfig.colors.primary};
+  color: ${SiteConfig.colors.text.primary};
 `;

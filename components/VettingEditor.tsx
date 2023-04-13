@@ -92,6 +92,6 @@ const Container = styled.div`
 `;
 
 const FormItemWithDivider = styled(FormItem)`
-  border-top: 1px solid ${SiteConfig.colors.accents.separator};
+  border-top: 1px solid ${SiteConfig.colors.secondary};
   padding-top: 1rem;
 `;

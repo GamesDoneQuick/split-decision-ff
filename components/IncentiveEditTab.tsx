@@ -122,7 +122,7 @@ export const IncentiveEditTab: React.FC<IncentiveEditTabProps> = ({ event, submi
               onChange={handleSelectSubmission}
               formatOptionLabel={item => item.gameTitle}
               getOptionValue={item => item.gameTitle}
-              classNamePrefix="submission-select"
+              classNamePrefix="selector"
               isClearable={false}
               value={selectedSubmission}
               placeholder="Select a submission."
@@ -221,10 +221,6 @@ const ExistingSubmissionsList = styled.ul`
 
   & > li + li {
     margin-top: 1rem;
-  }
-
-  & .submission-select__option {
-    color: ${SiteConfig.colors.text.dark};
   }
 `;
 

@@ -22,7 +22,7 @@ export const TextButton = styled.button`
 
   &:hover,
   &:active {
-    color: ${SiteConfig.colors.accents.alert};
+    color: ${SiteConfig.colors.accents.hover.link};
   }
 `;
 
@@ -34,7 +34,7 @@ export const Anchor = styled.a`
 
   &:hover,
   &:active {
-    color: ${SiteConfig.colors.accents.alert};
+    color: ${SiteConfig.colors.accents.hover.link};
   }
 `;
 
@@ -52,7 +52,7 @@ export const FormItem = styled.div`
 `;
 
 export const Label = styled.label`
-  margin-bottom: 0.125rem;
+  margin-bottom: 0.25rem;
 `;
 
 const InputControlContainer = styled.div`
@@ -63,9 +63,9 @@ const InputControlContainer = styled.div`
 const TextInputControl = styled.input<{ hasError: boolean }>`
   font-size: 1rem;
   font-family: inherit;
-  background-color: #fff;
-  color: #000;
-  border: 1px solid ${({ hasError }) => hasError ? SiteConfig.colors.error.text : SiteConfig.colors.accents.control};
+  background-color: ${SiteConfig.colors.input.background};
+  color: ${SiteConfig.colors.input.text};
+  border: 1px solid ${({ hasError }) => hasError ? SiteConfig.colors.error.text : SiteConfig.colors.input.border};
   border-radius: 0.25rem;
   padding: 0.5rem;
 `;
@@ -74,9 +74,9 @@ const TextAreaInputControl = styled.textarea<{ hasError: boolean }>`
   font-size: 1rem;
   font-family: inherit;
   height: 10rem;
-  background-color: #fff;
-  color: #000;
-  border: 1px solid ${({ hasError }) => hasError ? SiteConfig.colors.error.text : SiteConfig.colors.accents.control};
+  background-color: ${SiteConfig.colors.input.background};
+  color: ${SiteConfig.colors.input.text};
+  border: 1px solid ${({ hasError }) => hasError ? SiteConfig.colors.error.text : SiteConfig.colors.input.border};
   border-radius: 0.25rem;
   padding: 0.5rem;
   resize: vertical;
@@ -85,11 +85,15 @@ const TextAreaInputControl = styled.textarea<{ hasError: boolean }>`
 const SelectInputControl = styled.select<{ hasError: boolean }>`
   font-size: 1rem;
   font-family: inherit;
-  background-color: #fff;
-  color: #000;
-  border: 1px solid ${({ hasError }) => hasError ? SiteConfig.colors.error.text : SiteConfig.colors.accents.control};
+  background-color: ${SiteConfig.colors.input.background};
+  color: ${SiteConfig.colors.input.text};
+  border: 1px solid ${({ hasError }) => hasError ? SiteConfig.colors.error.text : SiteConfig.colors.input.border};
   border-radius: 0.25rem;
   padding: 0.5rem;
+
+  & option {
+    color: ${SiteConfig.colors.text.dark};
+  }
 
   &:disabled {
     opacity: 0.5;
@@ -104,7 +108,7 @@ export const InputError = styled.p`
 
 export const HelpText = styled.p<{ dark?: boolean }>`
   margin: 0.5rem 0 0;
-  color: ${({ dark }) => dark ? SiteConfig.colors.text.darkLabel : SiteConfig.colors.text.light};
+  color: ${({ dark }) => dark ? SiteConfig.colors.text.darkLabel : SiteConfig.colors.text.primary};
   font-style: italic;
   font-size: 1rem;
 `;
@@ -169,7 +173,7 @@ const ToggleSwitchSlider = styled.span`
   cursor: pointer;
   width: 4rem;
   height: 2rem;
-  background-color: ${SiteConfig.colors.text.primary};
+  background-color: ${SiteConfig.colors.input.background};
   transition: 0.4s;
   border-radius: 1.75rem;
 
@@ -185,6 +189,7 @@ const ToggleSwitchSlider = styled.span`
     transition: 0.4s;
   }
 `;
+
 const ToggleSwitchInput = styled.input`
   opacity: 0;
   width: 0;
@@ -195,7 +200,7 @@ const ToggleSwitchInput = styled.input`
   border: none;
 
   &:checked + ${ToggleSwitchSlider} {
-    background-color: ${SiteConfig.colors.accents.control};
+    background-color: ${SiteConfig.colors.accents.header};
   }
 
   &:checked + ${ToggleSwitchSlider}:before {
@@ -203,7 +208,7 @@ const ToggleSwitchInput = styled.input`
   }
 
   &:focus + ${ToggleSwitchSlider} {
-    box-shadow: 0 0 1px ${SiteConfig.colors.accents.control};
+    box-shadow: 0 0 1px ${SiteConfig.colors.accents.header};
   }
 `;
 
@@ -234,13 +239,12 @@ export const ButtonElement = styled.button`
   border: none;
   background-color: ${SiteConfig.colors.accents.control};
   color: #fff;
-  font-family: inherit;
-  font-size: 1.25rem;
-  padding: 0.5rem 0.5rem;
+  font-family: 'Lexend', sans-serif;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
   text-align: center;
-  border-radius: 1.375rem;
+  border-radius: 0.25rem;
   transition: background-color 200ms ease-in;
-  line-height: 1.5;
   cursor: pointer;
   
   &:disabled {
@@ -331,5 +335,18 @@ export const EventPageTitle = styled.h1`
     flex-direction: column;
     text-align: left;
     align-items: flex-start;
+  }
+`;
+
+export const ReturnToProfile = styled.a`
+  display: block;
+  color: ${SiteConfig.colors.accents.link};
+  font-size: 1.25rem;
+  margin: 1rem 0;
+  cursor: pointer;
+
+  &:hover,
+  &:active {
+    color: ${SiteConfig.colors.accents.hover.link};
   }
 `;

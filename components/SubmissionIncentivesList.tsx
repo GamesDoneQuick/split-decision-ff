@@ -105,7 +105,7 @@ const SubmissionDetailsContainer = styled.div`
   flex-direction: column;
 
   & + & {
-    border-top: 1px solid ${SiteConfig.colors.accents.separator};
+    border-top: 1px solid ${SiteConfig.colors.secondary};
     padding-top: 0.5rem;
     margin-top: 0.5rem;
   }

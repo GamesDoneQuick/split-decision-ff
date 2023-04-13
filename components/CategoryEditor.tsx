@@ -92,7 +92,7 @@ const CategoryContainer = styled.div`
   & + & {
     margin: 1rem 0 0;
     padding 1rem 0;
-    border-top: 1px solid ${SiteConfig.colors.accents.separator};
+    border-top: 1px solid ${SiteConfig.colors.secondary};
   }
 `;
 

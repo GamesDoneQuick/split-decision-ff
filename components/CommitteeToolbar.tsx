@@ -58,35 +58,34 @@ export const CommitteeToolbar: React.FC<CommitteeToolbarProps> = ({ children, is
           ))}
         </ToolkitDropdown>
       </ToolkitDropdownButton>
-      {children}
+      <ToolkitContent>
+        {children}
+      </ToolkitContent>
     </Container>
   );
 };
 
 const Container = styled.div`
   position: relative;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  height: 3.5rem;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  /* height: 3.5rem; */
   font-size: 1rem;
   font-weight: 700;
-  margin: 0 -1rem;
-  padding: 0 1rem;
-  background-color: ${SiteConfig.colors.accents.separator};
-  border-bottom: 1px solid ${SiteConfig.colors.primary};
+  padding: 0 1rem 0 0;
+  /* background-color: ${SiteConfig.colors.secondary}; */
 `;
 
 const ToolkitDropdown = styled.div`
   position: absolute;
   bottom: 0;
-  left: -0.5rem;
-  width: calc(100% + 1rem);
+  left: 0;
+  /* left: -1rem; */
+  width: 100%;
   display: none;
   flex-direction: column;
   transform: translateY(100%);
-  background-color: ${SiteConfig.colors.accents.separator};
-  border: 1px solid ${SiteConfig.colors.primary};
+  background-color: ${SiteConfig.colors.primary};
   border-top: 0;
 `;
 
@@ -94,17 +93,18 @@ const ToolkitDropdownButton = styled.div`
   position: relative;
   display: flex;
   height: 100%;
-  padding: 0 1.25rem 0 0.25rem;
+  padding: 0 2.25rem 0 1.25rem;
   flex-direction: row;
   justify-content: center;
   align-items: center;
   overflow: visible;
+  transition: background-color 100ms ease-in;
   z-index: 3;
 
   &:after {
     content: ' ';
     position: absolute;
-    right: 0.25rem;
+    right: 1.25rem;
     top: 50%;
     border-top: 0.25rem solid ${SiteConfig.colors.text.light};
     border-left: 0.25rem solid transparent;
@@ -112,16 +112,20 @@ const ToolkitDropdownButton = styled.div`
     transform: translateY(-50%);
   }
 
-  &:hover ${ToolkitDropdown} {
-    display: flex;
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+
+    & ${ToolkitDropdown} {
+      display: flex;
+    }
   }
 `;
 
 const ToolkitLink = styled.a`
   display: inline-block;
   width: 100%;
-  text-align: center;
-  padding: 1rem 0.5rem;
+  /* text-align: center; */
+  padding: 1rem 1.25rem;
   transition: background-color 100ms ease-in;
   cursor: pointer;
 
@@ -129,4 +133,14 @@ const ToolkitLink = styled.a`
   &:active {
     background-color: rgba(255, 255, 255, 0.1);
   }
+`;
+
+const ToolkitContent = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0.5rem 0;
+  flex-grow: 1;
+  min-width: 0;
+  align-self: stretch;
 `;

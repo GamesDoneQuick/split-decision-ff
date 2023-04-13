@@ -28,21 +28,22 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   height: 100%;
-  border-right: 1px solid ${SiteConfig.colors.accents.separator};
+  background-color: ${SiteConfig.colors.secondary};
+  border-right: 1px solid ${SiteConfig.colors.primary};
 
   @media screen and (max-width: 800px) {
     flex-direction: row;
     height: max-content;
     width: 100%;
     border-right: none;
-    border-bottom: 1px solid ${SiteConfig.colors.accents.separator};
+    border-bottom: 1px solid ${SiteConfig.colors.primary};
 
   }
 `;
 
 const Tab = styled(Button)<{ isActive: boolean }>`
-  background-color: ${({ isActive }) => isActive ? SiteConfig.colors.accents.separator : 'transparent'};
-  color: ${SiteConfig.colors.text.light};
+  background-color: ${({ isActive }) => isActive ? SiteConfig.colors.primary : 'transparent'};
+  color: ${SiteConfig.colors.text.primary};
   border-radius: 0;
   text-align: right;
   padding: 1.5rem 1rem 1.5rem 2.5rem;
@@ -56,6 +57,6 @@ const Tab = styled(Button)<{ isActive: boolean }>`
 
   &&:hover,
   &&:active {
-    background-color: ${({ isActive }) => isActive ? SiteConfig.colors.accents.separator : 'rgba(255, 255, 255, 0.2)'};
+    background-color: ${({ isActive }) => isActive ? SiteConfig.colors.primary : 'rgba(255, 255, 255, 0.1)'};
   }
 `;

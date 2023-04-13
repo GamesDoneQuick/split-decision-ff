@@ -270,7 +270,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({ event: eventRecord, on
           onChange={handleUpdateMaxCategories}
         />
       </FormItem>
-      <CommitteeSearchFormItem>
+      <FormItem>
         <Label htmlFor="committeeMembers">Committee Members</Label>
         <Async<PublicUserData, true>
           id="committeeMembers"
@@ -279,11 +279,11 @@ export const EventEditor: React.FC<EventEditorProps> = ({ event: eventRecord, on
           getOptionLabel={user => user.name || ''}
           getOptionValue={user => user.id}
           value={validatedEvent.value.committeeMembers}
-          classNamePrefix="committee-search"
+          classNamePrefix="selector"
           onChange={handleUpdateCommittee}
           isMulti
         />
-      </CommitteeSearchFormItem>
+      </FormItem>
       <FormItemWithDivider>
         <Button onClick={handleSave} disabled={isSaving || !!validatedEvent.error}>Save</Button>
       </FormItemWithDivider>
@@ -305,7 +305,7 @@ const Instructions = styled.h2`
 `;
 
 const FormItemWithDivider = styled(FormItem)`
-  border-top: 1px solid ${SiteConfig.colors.accents.separator};
+  border-top: 1px solid ${SiteConfig.colors.secondary};
   padding-top: 1rem;
 `;
 
@@ -327,11 +327,5 @@ const EventAction = styled(Button)`
 const EventLink = styled.a`
   & + ${EventAction} {
     margin-left: 0.5rem;
-  }
-`;
-
-const CommitteeSearchFormItem = styled(FormItem)`
-  & .committee-search__option {
-    color: ${SiteConfig.colors.text.dark};
   }
 `;

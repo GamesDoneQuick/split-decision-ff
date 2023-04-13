@@ -99,7 +99,7 @@ _These are kind of a mess, sorry!_
 
 `colors.accents.eventItem` - The color used the background of events in listings.
 
-`colors.accents.separator` - The color used for form section separators. This is also sometimes used as a background color when alternating table rows.
+`colors.secondary` - The color used for form section separators. This is also sometimes used as a background color when alternating table rows.
 
 `colors.accents.alert` - The background color of alerts. This should be some shade of blue for consistency with other elements that use this color.
 

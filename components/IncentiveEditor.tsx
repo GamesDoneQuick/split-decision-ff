@@ -165,12 +165,12 @@ const CategoryContainer = styled.div`
   & + & {
     margin: 1rem 0 0;
     padding 1rem 0;
-    border-top: 1px solid ${SiteConfig.colors.accents.separator};
+    border-top: 1px solid ${SiteConfig.colors.secondary};
   }
 `;
 
 const FormItemWithDivider = styled(FormItem)`
-  border-top: 1px solid ${SiteConfig.colors.accents.separator};
+  border-top: 1px solid ${SiteConfig.colors.secondary};
   padding-top: 1rem;
   margin-top: 1rem;
 `;
@@ -184,7 +184,7 @@ const IncentiveInstructions = styled.div`
   font-size: 1.25rem;
   margin: -0.5rem -1rem 0.5rem;
   padding: 0.5rem 1rem;
-  background-color: ${SiteConfig.colors.accents.separator};
+  background-color: ${SiteConfig.colors.secondary};
   border-bottom: 1px solid ${SiteConfig.colors.primary};
 `;
 

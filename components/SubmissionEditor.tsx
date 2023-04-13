@@ -283,11 +283,11 @@ const CategoryList = styled.ul`
   list-style: none;
   margin: 1rem 0 0;
   padding: 1rem 0;
-  border-top: 1px solid ${SiteConfig.colors.accents.separator};
+  border-top: 1px solid ${SiteConfig.colors.secondary};
 `;
 
 const FormItemWithDivider = styled(FormItem)`
-  border-top: 1px solid ${SiteConfig.colors.accents.separator};
+  border-top: 1px solid ${SiteConfig.colors.secondary};
   padding-top: 1rem;
   margin-top: 1rem;
 `;
@@ -307,7 +307,7 @@ const Separator = styled.div`
   display: block; 
   width: 100%;
   height: 1px;
-  background-color: ${SiteConfig.colors.accents.separator};
+  background-color: ${SiteConfig.colors.secondary};
   margin: 0.5rem 0;
 `;
 

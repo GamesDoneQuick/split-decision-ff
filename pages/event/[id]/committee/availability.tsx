@@ -122,25 +122,20 @@ const RunnerAvailability: NextPage<RunnerAvailabilityProps> = ({ event, usersInE
 
   return (
     <Container>
-      <WelcomeMessageContainer>
-        <EventHeaderContainer>
-          {/* <EventPageTitle>Runner Availability for {event.eventName}</EventPageTitle> */}
-          <AvailabilityToolbar event={event} isCommitteeMember activePage="availability">
-            <UserSelectorContainer>
-              <Label htmlFor="userSelect">Runner</Label>
-              <Select
-                id="userSelect"
-                options={usersInEvent}
-                value={selectedUser}
-                classNamePrefix="user-selector"
-                getOptionValue={item => item.id}
-                getOptionLabel={item => item.name ?? '<Name missing>'}
-                onChange={handleSelectUser}
-              />
-            </UserSelectorContainer>
-          </AvailabilityToolbar>
-        </EventHeaderContainer>
-      </WelcomeMessageContainer>
+      <CommitteeToolbar event={event} isCommitteeMember activePage="availability">
+        <UserSelectorContainer>
+          <Label htmlFor="userSelect">Runner</Label>
+          <Select
+            id="userSelect"
+            options={usersInEvent}
+            value={selectedUser}
+            classNamePrefix="selector"
+            getOptionValue={item => item.id}
+            getOptionLabel={item => item.name ?? '<Name missing>'}
+            onChange={handleSelectUser}
+          />
+        </UserSelectorContainer>
+      </CommitteeToolbar>
       <CalendarSection>
         {availabilitySegments !== null && (
           <Calendar hours={hourSegments.length}>
@@ -225,17 +220,6 @@ const Container = styled.div`
   overflow: hidden;
 `;
 
-const WelcomeMessageContainer = styled.div`
-  & > p {
-    font-size: 1.5rem;
-    margin: 0 0 0.5rem;
-  }
-`;
-
-const EventHeaderContainer = styled.div`
-  padding: 1rem 1rem 0;
-`;
-
 const UserSelectorContainer = styled(FormItem)`
   position: relative;
   margin-left: 1rem;
@@ -244,18 +228,10 @@ const UserSelectorContainer = styled(FormItem)`
   align-self: stretch;
   justify-content: center;
   z-index: 3;
+
   & > div {
     width: 100%;  
   }
-
-  & .user-selector__option {
-    color: ${SiteConfig.colors.text.dark};
-  }
-`;
-
-const AvailabilityToolbar = styled(CommitteeToolbar)`
-  height: 5rem;
-  margin-top: -1rem;
 `;
 
 const CalendarSection = styled.div`
@@ -277,7 +253,7 @@ const CalendarHeader = styled.div`
   position: sticky;
   top: 0;
   font-weight: 700;
-  background-color: ${SiteConfig.colors.accents.separator};
+  background-color: ${SiteConfig.colors.secondary};
   padding: 0.5rem 1rem;
   z-index: 2;
 `;
