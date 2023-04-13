@@ -199,5 +199,5 @@ const UserActions = styled.div`
 `;
 
 const Title = styled(WelcomeMessage)`
-  margin-top: 0.5rem;
+  margin-top: 1rem;
 `;

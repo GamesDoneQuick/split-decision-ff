@@ -58,7 +58,7 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
       .filter(item => {
         if (normalizedQuery.length === 0) return true;
 
-        const submissionSearchString = normalizeText(`${item.gameTitle} ${item.user} ${item.categories.map(cat => cat.categoryName).join(' ')}`);
+        const submissionSearchString = normalizeText(`${item.gameTitle} ${item.user.name} ${item.categories.map(cat => cat.categoryName).join(' ')}`);
 
         return submissionSearchString.indexOf(normalizedQuery) !== -1;
       })
