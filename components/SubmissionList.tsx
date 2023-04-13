@@ -112,7 +112,7 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incenti
         <td width="10%">
           <SelectInput disabled={isSaving} value={runStatus} onChange={handleChangeStatus}>
             {RUN_STATUS_OPTIONS.map(option => (
-              <option value={option}>{option}</option>
+              <option key={option} value={option}>{option}</option>
             ))}
           </SelectInput>
           {saveError.error && (
@@ -245,7 +245,7 @@ export const SubmissionList: React.FC<SubmissionListProps> = ({ submissions, sho
               )}
             </Username>
           )}
-          {list.map(submission => <SubmissionDetails submission={submission} isCommitteeMember={isCommitteeMember} />)}
+          {list.map(submission => <SubmissionDetails key={submission.id} submission={submission} isCommitteeMember={isCommitteeMember} />)}
         </UserSubmissions>
       ))}
     </Container>
