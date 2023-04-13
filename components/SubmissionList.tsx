@@ -55,7 +55,7 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incenti
       <DescriptionCell>
         {category.description}
 
-        {isCommitteeMember && (
+        {isCommitteeMember && incentives.length > 0 && (
           <IncentiveDrawer>
             <IncentiveDrawerHead>
               <strong>{pluralizeWithValue(incentives.length, 'incentive')}</strong>
@@ -139,7 +139,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({ submission, isCom
     return submission.incentives.reduce<Record<string, IncentiveWithCategories[]>>((acc, incentive) => (
       incentive.attachedCategories.reduce((innerAcc, category) => ({
         ...innerAcc,
-        [category.categoryId]: [...innerAcc[category.categoryId], incentive],
+        [category.categoryId]: [...(innerAcc[category.categoryId] || []), incentive],
       }), acc)
     ), categoryMapping);
   }, [submission, isCommitteeMember]);
