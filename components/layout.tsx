@@ -318,3 +318,18 @@ export const Badge = styled.span`
   font-size: 0.825rem;
   background-color: ${SiteConfig.colors.primary};
 `;
+
+export const EventPageTitle = styled.h1`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin: 0;
+
+  @media screen and (max-width: 800px) {
+    flex-direction: column;
+    text-align: left;
+    align-items: flex-start;
+  }
+`;

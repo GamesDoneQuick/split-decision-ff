@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useOnMount } from '../utils/hooks';
 import { getEventSubmissionTimeString } from './EventList';
+import { EventPageTitle } from './layout';
 
 interface EventHeaderProps {
   event: Event;
@@ -18,13 +19,13 @@ export const EventHeader: React.FC<EventHeaderProps> = ({ event: eventRecord }) 
   });
   
   return (
-    <WelcomeMessage>
+    <EventPageTitle>
       {eventRecord.eventName}
       <EventStats>
         <EventStartTime>Starts on {intlFormat(parseISO((eventRecord.eventStart as unknown) as string))}</EventStartTime>
         <SubmissionCloseTime>{submissionCloseTime}</SubmissionCloseTime>
       </EventStats>
-    </WelcomeMessage>
+    </EventPageTitle>
   );
 };
 
@@ -47,19 +48,4 @@ const EventStartTime = styled.h2`
 const SubmissionCloseTime = styled.h2`
   font-size: 1.75rem;
   margin: 0.5rem 0;
-`;
-
-const WelcomeMessage = styled.h1`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  font-size: 3.5rem;
-  font-weight: 700;
-  margin: 0;
-
-  @media screen and (max-width: 800px) {
-    flex-direction: column;
-    text-align: left;
-    align-items: flex-start;
-  }
 `;

@@ -2,17 +2,11 @@ import { Request, Response } from 'express';
 // eslint-disable-next-line camelcase
 import { unstable_getServerSession } from 'next-auth';
 import { Parser } from 'json2csv';
-import { format, utcToZonedTime } from 'date-fns-tz';
 import { prisma } from '../../../../utils/db';
 import { authOptions } from '../../auth/[...nextauth]';
 import { isMemberOfCommittee } from '../../../../utils/eventHelpers';
 import { handleAPIRoute } from '../../../../utils/apiUtils';
-
-interface DateSegment {
-  date: string;
-  start: number;
-  end: number;
-}
+import { availabilitySlotsToSegments } from '../../../../utils/durationHelpers';
 
 interface ExportedSubmissionRow {
   userName: string;
@@ -113,35 +107,7 @@ export default async function handle(req: Request, res: Response) {
         let availabilityString = '';
 
         if (availability) {
-          const slots = [...availability.slots].sort((a, b) => a.toISOString().localeCompare(b.toISOString()));
-
-          // Remove duplicates
-          const dedupedSlots = slots.filter((slot, index) => slots.findIndex(x => x.toISOString() === slot.toISOString()) === index);
-
-          const availabilitySegments = dedupedSlots.reduce<DateSegment[]>((acc, slot) => {
-            const previousSlot: DateSegment = acc[acc.length - 1];
-            const zonedTime = utcToZonedTime(slot, 'America/New_York');
-            const slotDate = format(zonedTime, 'MMM do', { timeZone: 'America/New_York' });
-            const slotTime = Number(format(zonedTime, 'H', { timeZone: 'America/New_York' }));
-
-            if (previousSlot && previousSlot.date === slotDate && previousSlot.end === slotTime) {
-              return [
-                ...acc.slice(0, -1),
-                {
-                  ...previousSlot,
-                  end: slotTime + 1,
-                },
-              ];
-            }
-
-            return [...acc,
-              {
-                date: slotDate,
-                start: slotTime,
-                end: slotTime + 1,
-              },
-            ];
-          }, [] as DateSegment[]);
+          const availabilitySegments = availabilitySlotsToSegments(availability);
 
           availabilityString = availabilitySegments.map(segment => `${segment.date} ${segment.start}:00-${segment.end === 23 ? '23:59' : `${segment.end}:00`}`).join(', ');
         }

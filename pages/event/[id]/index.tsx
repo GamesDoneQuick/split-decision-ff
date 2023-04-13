@@ -17,6 +17,7 @@ import { fetchEventWithCommitteeMemberIdsAndNames } from '../../../utils/dbHelpe
 import { isMemberOfCommittee } from '../../../utils/eventHelpers';
 import { pluralizeWithValue } from '../../../utils/humanize';
 import { stringDurationToSeconds } from '../../../utils/durationHelpers';
+import { CommitteeToolbar } from '../../../components/CommitteeToolbar';
 
 type CategoryContainingRecord = { categories: GameSubmissionCategory[] }[];
 
@@ -172,8 +173,7 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
         <EventHeaderContainer>
           <EventHeader event={event} />
           {isCommitteeMember && (
-            <CommitteeMemberWelcome>
-              Committee Toolkit
+            <CommitteeToolbar event={event} isCommitteeMember={isCommitteeMember} activePage="submissions">
               <EventMetadata>
                 <EventMetadataHeader>Event Visibility</EventMetadataHeader>
                 <EventMetadataHeader>Acceptance Statuses</EventMetadataHeader>
@@ -187,7 +187,7 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
                   </EventAction>
                 </EventLink>
               </CommitteeMemberTools>
-            </CommitteeMemberWelcome>
+            </CommitteeToolbar>
           )}
         </EventHeaderContainer>
         <FilterContainer>
@@ -369,18 +369,6 @@ const SubmissionTotal = styled.div`
   color: ${SiteConfig.colors.text.light};
 `;
 
-const CommitteeMemberWelcome = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  font-size: 1rem;
-  font-weight: 700;
-  margin: 0 -1rem;
-  padding: 0 1rem;
-  background-color: ${SiteConfig.colors.accents.separator};
-  border-bottom: 1px solid ${SiteConfig.colors.primary};
-`;
-
 const CommitteeMemberTools = styled.div`
   margin-left: auto;
 `;
@@ -445,7 +433,7 @@ const StatusFilter = styled(Button)<{ active: boolean; activeColor: string }>`
 
   &&:hover,
   &&:active {
-    background-color: ${({ active, activeColor }) => active ? '#777' : activeColor};
+    background-color: ${({ activeColor }) => activeColor};
   }
 `;
 
