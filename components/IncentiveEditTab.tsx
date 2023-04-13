@@ -95,6 +95,12 @@ export const IncentiveEditTab: React.FC<IncentiveEditTabProps> = ({ event, submi
     onChange(allIncentives.filter(item => item.id !== id));
   }, [allIncentives, onChange, event.id]);
   
+  const handleSelectIncentive = useCallback((incentive: IncentiveWithCategories) => {
+    if (!allowIncentives || !selectedSubmission) return;
+    
+    setActiveParentSubmission(selectedSubmission);
+    setActiveIncentive(flattenIncentive(incentive));
+  }, [selectedSubmission, allowIncentives]);
   const remainingIncentives = event.maxIncentives - selectedIncentives.length;
 
   return (
@@ -124,7 +130,7 @@ export const IncentiveEditTab: React.FC<IncentiveEditTabProps> = ({ event, submi
 
             {selectedIncentives.map(incentive => (
               <li key={incentive.id}>
-                <ExistingSubmissionButton onClick={() => allowIncentives && setActiveIncentive(flattenIncentive(incentive))}>
+                <ExistingSubmissionButton onClick={() => handleSelectIncentive(incentive)}>
                   <ExistingSubmissionInfo>
                     <ExistingSubmissionTitle>{incentive.name}</ExistingSubmissionTitle>
                   </ExistingSubmissionInfo>

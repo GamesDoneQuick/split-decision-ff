@@ -69,7 +69,7 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incenti
                   <thead>
                     <tr>
                       <th>Name</th>
-                      <th>Estimate</th>
+                      <th>Est.</th>
                       <th>Deadline</th>
                       <th>Description</th>
                       {/* <th>Status</th> */}
@@ -110,11 +110,11 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incenti
       </DescriptionCell>
       {isCommitteeMember && (
         <td width="10%">
-          <SelectInput disabled={isSaving} value={runStatus} onChange={handleChangeStatus}>
+          <StatusSelector disabled={isSaving} value={runStatus} onChange={handleChangeStatus}>
             {RUN_STATUS_OPTIONS.map(option => (
               <option key={option} value={option}>{option}</option>
             ))}
-          </SelectInput>
+          </StatusSelector>
           {saveError.error && (
             <Alert variant="error">
               Could not save status: {saveError.message}
@@ -384,6 +384,8 @@ const IncentiveDrawerHead = styled.div`
 
 const ShowIncentivesButton = styled(Button)`
   margin-left: auto;
+  font-size: 0.825rem;
+  padding: 0.25rem 1rem;
 `;
 
 const IncentiveList = styled.div`
@@ -419,4 +421,11 @@ const StatusBadge = styled(Badge)<{ status: RunStatus }>`
         return 'transparent';
     }
   }};
+`;
+
+const StatusSelector = styled(SelectInput)`
+  border: none;
+  background-color: transparent;
+  color: ${SiteConfig.colors.text.light};
+  padding: 0;
 `;
