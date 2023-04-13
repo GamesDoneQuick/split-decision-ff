@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import type { NextPage, NextPageContext } from 'next';
 import { useRouter } from 'next/router';
@@ -17,18 +17,20 @@ import { availabilitySlotsToSegments, DateSegment } from '../../../../utils/dura
 
 type CalendarSpan = { hours: number; start: number; end: number; available: true } | { hours: number; available: false };
 
-function formatHour(hour: number) {
-  if (hour > 12) return `${hour - 12} PM`;
+function formatHour(hour: number, suffix = true) {
+  if (hour === 12) return `12${suffix ? ' PM' : ''}`;
+  if (hour === 24 || hour === 0) return `12${suffix ? ' AM' : ''}`;
+  if (hour > 12) return `${hour - 12}${suffix ? ' PM' : ''}`;
 
-  return `${hour} AM`;
+  return `${hour}${suffix ? ' AM' : ''}`;
 }
 
 function formatRange(start: number, end: number) {
-  if (end > 12 && start <= 12) {
+  if ((end >= 12 && start < 12) || (end === 24 && start >= 12)) {
     return `${formatHour(start)}—${formatHour(end)}`;
   }
 
-  return `${start % 12}—${formatHour(end)}`;
+  return `${formatHour(start, false)}—${formatHour(end)}`;
 }
 
 function getEventDates(event: Event) {
@@ -41,6 +43,7 @@ function getEventDates(event: Event) {
     ], [] as Date[])
     .map(date => format(date, 'MMM do', { timeZone: 'America/New_York' }));
 }
+
 interface RunnerAvailabilityProps {
   event: EventWithCommitteeMemberIdsAndNames;
   usersInEvent: (User & { eventAvailabilities: EventAvailability[] })[];
@@ -54,6 +57,15 @@ const RunnerAvailability: NextPage<RunnerAvailabilityProps> = ({ event, usersInE
 
   const hourSegments = [...Array(event.endTime - event.startTime)].map((_, index) => index + event.startTime);
 
+  const handleSelectUser = useCallback((value: User | null) => {
+    if (!value) return;
+  
+    setSelectedUsername(value.name || '');
+    router.replace({
+      query: { ...router.query, user: value.name },
+    });
+  }, [router]);
+  
   const availabilitySegments = useMemo(() => {
     if (!selectedUser) return null;
 
@@ -69,14 +81,16 @@ const RunnerAvailability: NextPage<RunnerAvailabilityProps> = ({ event, usersInE
     }), {} as Record<string, DateSegment[]>);
 
     return Object.entries(segmentsByDate).reduce((acc, [date, slots]) => {
-      const slotsWithFiller = slots.reduce((innerAcc, slot, index) => {
+      // Filter out slots that roll over to the next day (weird hiccup of the availability picker)
+      const slotsWithFiller = slots.filter(slot => slot.start >= event.startTime).reduce((innerAcc, slot, index, slotSet) => {
         const newSlots: CalendarSpan[] = [];
+
         // Fill until start of day
         if (index === 0 && slot.start > event.startTime) newSlots.push({ hours: slot.start - event.startTime, available: false });
 
         // Fill between end of last slot to start of this slot
         if (index > 0) {
-          const diffFromLastSlot = slot.start - slots[index - 1].end;
+          const diffFromLastSlot = slot.start - slotSet[index - 1].end;
 
           if (diffFromLastSlot > 0) newSlots.push({ hours: diffFromLastSlot, available: false });
         }
@@ -90,7 +104,7 @@ const RunnerAvailability: NextPage<RunnerAvailabilityProps> = ({ event, usersInE
         });
 
         // Fill until end of day
-        if (index === slots.length - 1 && slot.end < event.endTime) {
+        if (index === slotSet.length - 1 && slot.end < event.endTime) {
           newSlots.push({ hours: event.endTime - slot.end, available: false });
         }
 
@@ -119,8 +133,9 @@ const RunnerAvailability: NextPage<RunnerAvailabilityProps> = ({ event, usersInE
                 options={usersInEvent}
                 value={selectedUser}
                 classNamePrefix="user-selector"
+                getOptionValue={item => item.id}
                 getOptionLabel={item => item.name ?? '<Name missing>'}
-                onChange={value => setSelectedUsername(value?.name ?? '')}
+                onChange={handleSelectUser}
               />
             </UserSelectorContainer>
           </AvailabilityToolbar>
@@ -222,12 +237,13 @@ const EventHeaderContainer = styled.div`
 `;
 
 const UserSelectorContainer = styled(FormItem)`
+  position: relative;
   margin-left: 1rem;
   min-width: 0;
   flex-grow: 1;
   align-self: stretch;
   justify-content: center;
-
+  z-index: 3;
   & > div {
     width: 100%;  
   }
@@ -248,10 +264,12 @@ const CalendarSection = styled.div`
   align-self: stretch;
   overflow-y: auto;
 `;
+
 const Calendar = styled.div<{ hours: number }>`
   display: grid;
   width: 100%;
   grid-template-rows: repeat(${({ hours }) => hours + 1}, 1fr);
+  grid-template-columns: 4rem;
   grid-auto-flow: column;
 `;
 
