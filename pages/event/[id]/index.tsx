@@ -40,7 +40,7 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
   const router = useRouter();
   const [filterValue, setFilterValue] = useState((router.query.filter || '').toString());
   const [showPending, setShowPending] = useState(router.query.pending !== 'false');
-  const [showRejected, setShowRejected] = useState(router.query.rejected !== 'false');
+  const [showDeclined, setShowDeclined] = useState(router.query.declined !== 'false');
   const [showBackup, setShowBackup] = useState(router.query.backup !== 'false');
   const [showAccepted, setShowAccepted] = useState(router.query.accepted !== 'false');
   const [subcommitteeFilters, setSubcommitteeFilters] = useState(() => {
@@ -80,8 +80,8 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
             case 'Backup':
               return showBackup;
             
-            case 'Rejected':
-              return showRejected;
+            case 'Declined':
+              return showDeclined;
 
             case 'Pending':
               return isCommitteeMember && showPending;
@@ -100,7 +100,7 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
 
         return acc;
       }, [] as SubmissionWithCategoriesAndUsername[] | CommitteeVisibleSubmission[]);
-  }, [filterValue, submissions, showFilters, showAccepted, showBackup, showPending, showRejected, isCommitteeMember, subcommitteeFilters]);
+  }, [filterValue, submissions, showFilters, showAccepted, showBackup, showPending, showDeclined, isCommitteeMember, subcommitteeFilters]);
 
   const allCategoryCount = useMemo(() => getCategoryCount(submissions), [submissions]);
   const filteredCategoryCount = useMemo(() => getCategoryCount(filteredSubmissions), [filteredSubmissions]);
@@ -138,12 +138,12 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
     });
   }, [showBackup, router]);
 
-  const handleToggleShowRejected = useCallback(() => {
-    setShowRejected(!showRejected);
+  const handleToggleShowDeclined = useCallback(() => {
+    setShowDeclned(!showDeclined);
     router.replace({
-      query: { ...router.query, rejected: !showRejected },
+      query: { ...router.query, declined: !showDeclined },
     });
-  }, [showRejected, router]);
+  }, [showDeclined, router]);
 
   const handleToggleShowPending = useCallback(() => {
     setShowPending(!showPending);
@@ -230,11 +230,11 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
                   Backup
                 </StatusFilter>
                 <StatusFilter
-                  activeColor={SiteConfig.colors.status.rejected}
-                  onClick={handleToggleShowRejected}
-                  active={showRejected}
+                  activeColor={SiteConfig.colors.status.declined}
+                  onClick={handleToggleShowDeclined}
+                  active={showDeclined}
                 >
-                  Rejected
+                  Declined
                 </StatusFilter>
                 {isCommitteeMember && (
                   <StatusFilter

@@ -41,7 +41,7 @@ interface SiteConfiguration {
     },
     status: {
       accepted: string;
-      rejected: string;
+      declined: string;
       backup: string;
     }
   }
@@ -87,7 +87,7 @@ const DEFAULT_CONFIG: SiteConfiguration = {
     },
     status: {
       accepted: '#537334',
-      rejected: '#751114',
+      declined: '#751114',
       backup: '#69651F',
     },
   },

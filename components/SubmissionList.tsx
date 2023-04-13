@@ -13,7 +13,7 @@ const RUN_STATUS_OPTIONS = [
   RunStatus.Backup,
   RunStatus.Bonus,
   RunStatus.Pending,
-  RunStatus.Rejected,
+  RunStatus.Declined,
 ];
 
 type SubmissionRecord = SubmissionWithCategories | SubmissionWithCategoriesAndUsername | CommitteeVisibleSubmission;
@@ -414,8 +414,8 @@ const StatusBadge = styled(Badge)<{ status: RunStatus }>`
       case 'Backup':
         return SiteConfig.colors.status.backup;
 
-      case 'Rejected':
-        return SiteConfig.colors.status.rejected;
+      case 'Declined':
+        return SiteConfig.colors.status.declined;
 
       default:
         return 'transparent';

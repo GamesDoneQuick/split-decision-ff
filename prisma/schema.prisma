@@ -152,7 +152,7 @@ model GameSubmissionCategory {
 
 enum RunStatus {
   Accepted
-  Rejected
+  Declined
   Backup
   Bonus
   Pending
