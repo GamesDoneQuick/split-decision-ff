@@ -4,6 +4,7 @@ import type { NextPage, NextPageContext } from 'next';
 import { NextSeo } from 'next-seo';
 import { useRouter } from 'next/router';
 import { normalizeText } from 'normalize-text';
+import Select from 'react-select';
 import { GameSubmissionCategory } from '@prisma/client';
 import { formatDuration, intervalToDuration } from 'date-fns';
 import { prisma } from '../../../utils/db';
@@ -41,6 +42,11 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
   const [showRejected, setShowRejected] = useState(router.query.rejected !== 'false');
   const [showBackup, setShowBackup] = useState(router.query.backup !== 'false');
   const [showAccepted, setShowAccepted] = useState(router.query.accepted !== 'false');
+  const [subcommitteeFilters, setSubcommitteeFilters] = useState(() => {
+    const subcommittees = (router.query.subcommittees || '').toString();
+
+    return subcommittees ? subcommittees.split(',') : [];
+  });
 
   const showFilters = event.runStatusVisible || isCommitteeMember;
 
@@ -57,6 +63,12 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
       })
       .reduce((acc, item) => {
         if (!showFilters) return [...acc, item];
+
+        if (isCommitteeMember && subcommitteeFilters.length > 0) {
+          if (subcommitteeFilters.indexOf(item.primaryGenre) === -1 && subcommitteeFilters.indexOf(item.secondaryGenre || '') === -1) {
+            return acc;
+          }
+        }
 
         const validCategories: GameSubmissionCategory[] = item.categories.filter(category => {
           switch (category.runStatus) {
@@ -87,7 +99,7 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
 
         return acc;
       }, [] as SubmissionWithCategoriesAndUsername[] | CommitteeVisibleSubmission[]);
-  }, [filterValue, submissions, showFilters, showAccepted, showBackup, showPending, showRejected, isCommitteeMember]);
+  }, [filterValue, submissions, showFilters, showAccepted, showBackup, showPending, showRejected, isCommitteeMember, subcommitteeFilters]);
 
   const allCategoryCount = useMemo(() => getCategoryCount(submissions), [submissions]);
   const filteredCategoryCount = useMemo(() => getCategoryCount(filteredSubmissions), [filteredSubmissions]);
@@ -98,6 +110,11 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
   
     return formatDuration(intervalToDuration({ start: 0, end: seconds }), { delimiter: ', ' });
   }, [filteredSubmissions]);
+
+  const subcommitteeOptions = useMemo(() => event.genres.map(label => ({
+    value: label,
+    label,
+  })), [event.genres]);
 
   const handleUpdateFilterValue = useCallback((evt: React.ChangeEvent<HTMLInputElement>) => {
     setFilterValue(evt.target.value);
@@ -134,6 +151,17 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
     });
   }, [showPending, router]);
 
+  const handleChangeSubcommitteeFilters = useCallback((values: readonly { value: string; label: string; }[]) => {
+    const subcommitteeNames = values.map(({ value }) => value);
+
+    setSubcommitteeFilters([...subcommitteeNames]);
+    router.replace({
+      query: { ...router.query, subcommittees: subcommitteeNames },
+    });
+  }, [router]);
+
+  const mappedSubcommitteeValue = useMemo(() => subcommitteeFilters.map(x => ({ value: x, label: x })), [subcommitteeFilters]);
+
   return (
     <Container>
       <NextSeo
@@ -143,22 +171,24 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
       <WelcomeMessageContainer>
         <EventHeaderContainer>
           <EventHeader event={event} />
-          <CommitteeMemberWelcome>
-            Committee Toolkit
-            <EventMetadata>
-              <EventMetadataHeader>Event Visibility</EventMetadataHeader>
-              <EventMetadataHeader>Acceptance Statuses</EventMetadataHeader>
-              <div>{event.visible ? 'Hidden' : 'Visible'}</div>
-              <div>{event.runStatusVisible ? 'Hidden' : 'Visible'}</div>
-            </EventMetadata>
-            <CommitteeMemberTools>
-              <EventLink href={`/api/events/${event.id}/download`} target="_blank" rel="noopener noreferrer">
-                <EventAction>
-                  Export CSV
-                </EventAction>
-              </EventLink>
-            </CommitteeMemberTools>
-          </CommitteeMemberWelcome>
+          {isCommitteeMember && (
+            <CommitteeMemberWelcome>
+              Committee Toolkit
+              <EventMetadata>
+                <EventMetadataHeader>Event Visibility</EventMetadataHeader>
+                <EventMetadataHeader>Acceptance Statuses</EventMetadataHeader>
+                <div>{event.visible ? 'Visible' : 'Hidden'}</div>
+                <div>{event.runStatusVisible ? 'Visible' : 'Hidden'}</div>
+              </EventMetadata>
+              <CommitteeMemberTools>
+                <EventLink href={`/api/events/${event.id}/download`} target="_blank" rel="noopener noreferrer">
+                  <EventAction>
+                    Export CSV
+                  </EventAction>
+                </EventLink>
+              </CommitteeMemberTools>
+            </CommitteeMemberWelcome>
+          )}
         </EventHeaderContainer>
         <FilterContainer>
           <Label htmlFor="filterInput">Filter</Label>
@@ -171,6 +201,18 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
                 placeholder="Enter a game, runner, or category"
               />
             </TextFilterContainer>
+            {isCommitteeMember && (
+              <SubcommitteeSelectorContainer>
+                <Select
+                  options={subcommitteeOptions}
+                  value={mappedSubcommitteeValue}
+                  onChange={handleChangeSubcommitteeFilters}
+                  classNamePrefix="subcommittee-selector"
+                  isMulti
+                  placeholder="No subcommittee filter"
+                />
+              </SubcommitteeSelectorContainer>
+            )}
             {showFilters && (
               <StatusFilterContainer>
                 <StatusFilter
@@ -418,4 +460,13 @@ const TextFilterContainer = styled.div`
   min-width: 0;
   flex-grow: 1;
   align-self: stretch;
+`;
+
+const SubcommitteeSelectorContainer = styled.div`
+  margin-top: -1px;
+  margin-left: 0.5rem;
+  
+  & .subcommittee-selector__option {
+    color: ${SiteConfig.colors.text.dark};
+  }
 `;
