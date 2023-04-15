@@ -20,6 +20,11 @@ const TOOLKIT_PAGES: ToolkitPage[] = [
     name: 'Availability',
     link: '/committee/availability',
   },
+  {
+    id: 'schedule',
+    name: 'Schedule',
+    link: '/committee/schedule',
+  },
 ];
 
 interface CommitteeToolbarProps {

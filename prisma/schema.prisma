@@ -80,26 +80,29 @@ model VettingInfo {
 
 // Submissions
 model Event {
-  id                        String              @id @unique @default(cuid())
-  eventName                 String
-  gameSubmissionPeriodStart DateTime
-  gameSubmissionPeriodEnd   DateTime
-  incentiveSubmissionPeriodEnd        DateTime
-  eventStart                DateTime
-  eventDays                 Int                 @default(3)
-  startTime                 Int                 @default(9)
-  endTime                   Int                 @default(23)
-  visible                   Boolean             @default(false)
-  runStatusVisible          Boolean             @default(false)
-  maxSubmissions            Int                 @default(5)
-  maxCategories             Int                 @default(5)
-  maxIncentives             Int                 @default(5)
-  genres                    String[]            @default([])
-  gameSubmissions           GameSubmission[]
-  eventAvailabilities       EventAvailability[]
-  committeeMembers          User[]
-  createdAt                 DateTime?           @default(now())
-  updatedAt                 DateTime?           @updatedAt
+  id                           String              @id @unique @default(cuid())
+  eventName                    String
+  gameSubmissionPeriodStart    DateTime
+  gameSubmissionPeriodEnd      DateTime
+  incentiveSubmissionPeriodEnd DateTime
+  eventStart                   DateTime
+  eventDays                    Int                 @default(3)
+  startTime                    Int                 @default(9)
+  endTime                      Int                 @default(23)
+  visible                      Boolean             @default(false)
+  runStatusVisible             Boolean             @default(false)
+  maxSubmissions               Int                 @default(5)
+  maxCategories                Int                 @default(5)
+  maxIncentives                Int                 @default(5)
+  genres                       String[]            @default([])
+  firstRunId                   String?
+  gameSubmissions              GameSubmission[]
+  eventAvailabilities          EventAvailability[]
+  committeeMembers             User[]
+  scheduledRuns                ScheduledRun[]      @relation("ScheduledRunEvent")
+  firstRun                     ScheduledRun?       @relation(fields: [firstRunId], references: [id], onDelete: SetNull)
+  createdAt                    DateTime?           @default(now())
+  updatedAt                    DateTime?           @updatedAt
 }
 
 model EventAvailability {
@@ -139,6 +142,7 @@ model GameSubmission {
 model GameSubmissionCategory {
   id                 String                   @id @unique @default(cuid())
   gameSubmissionId   String
+  scheduleSlotId     String?
   categoryName       String
   videoURL           String
   estimate           String
@@ -146,6 +150,7 @@ model GameSubmissionCategory {
   runStatus          RunStatus                @default(Pending)
   gameSubmission     GameSubmission           @relation(fields: [gameSubmissionId], references: [id], onDelete: Cascade)
   attachedIncentives IncentivesOnCategories[]
+  scheduleSlot       ScheduledRun?
   createdAt          DateTime?                @default(now())
   updatedAt          DateTime?                @updatedAt
 }
@@ -179,4 +184,21 @@ model IncentivesOnCategories {
   incentiveId String
 
   @@id([incentiveId, categoryId])
+}
+
+model ScheduledRun {
+  id               String                  @id @unique @default(cuid())
+  eventId          String
+  categoryId       String?                 @unique
+  nextRunId        String?                 @unique
+  event            Event                   @relation("ScheduledRunEvent", fields: [eventId], references: [id], onDelete: Cascade)
+  category         GameSubmissionCategory? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  nextRun          ScheduledRun?           @relation("NextRun", fields: [nextRunId], references: [id], onDelete: SetNull)
+  previousRun      ScheduledRun?           @relation("NextRun")
+  setupTime        String
+  isInterstitial   Boolean                 @default(false)
+  interstitialName String?
+  createdAt        DateTime?               @default(now())
+  updatedAt        DateTime?               @updatedAt
+  firstEventFor    Event[]                 @ignore // required by prisma
 }

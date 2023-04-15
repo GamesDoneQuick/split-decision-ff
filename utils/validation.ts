@@ -5,6 +5,10 @@ import { EventWithCommitteeMemberIdsAndNames, EventWithStringDates, IncentiveWit
 
 const TIMESTAMP_REGEX = /^(?:(?:([0-9]*?\d|2[0-9]):)?([0-5]\d):)?([0-5]\d)$/;
 
+export function isTimestampValid(value: string) {
+  return value.match(TIMESTAMP_REGEX) !== null;
+}
+
 const GameSubmissionCategoryValidationSchema = Joi.object<GameSubmissionCategory>({
   categoryName: Joi.string().required().max(100).messages({
     'string.empty': 'Category name is required.',

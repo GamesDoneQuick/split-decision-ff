@@ -42,19 +42,27 @@ export type EventWithStringDates<T extends Event = Event> = Omit<T, 'gameSubmiss
   eventStart: string;
 }
 
+export function prepareAllRecordsForTransfer(records: (Record<string, unknown> | null)[]): (Record<string, unknown> | null)[] {
+  return records.map(prepareRecordForTransfer);
+}
+
+function normalizeValueForTransfer(value: unknown): unknown {
+  if (value === null) return null;
+  if (value === undefined) return undefined;
+
+  if (value instanceof Date) return value.toISOString();
+
+  if (Array.isArray(value)) return value.map(normalizeValueForTransfer);
+
+  if (typeof value === 'object') return prepareRecordForTransfer(value as Record<string, unknown>);
+
+  return value;
+}
+
 export function prepareRecordForTransfer(record: Record<string, unknown> | null): Record<string, unknown> | null {
   if (!record) return null;
 
-  return Object.entries(record).reduce((acc, [key, value]) => {
-    if (value instanceof Date) {
-      return {
-        ...acc,
-        [key]: value.toISOString(),
-      };
-    }
-
-    return { ...acc, [key]: value };
-  }, {});
+  return Object.entries(record).reduce((acc, [key, value]) => ({ ...acc, [key]: normalizeValueForTransfer(value) }), {});
 }
 
 export function prepareSubmissionForTransfer(submission: SubmissionWithCategories | null): Record<string, unknown> | null {
