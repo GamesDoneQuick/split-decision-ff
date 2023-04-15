@@ -278,7 +278,20 @@ const Scheduler: NextPage<SchedulerProps> = ({ event, categories, scheduledRuns 
   }, [selectedInsertionPoint, currentScheduleAvailabilityStatuses]);
 
   const handleRemoveSelectedRun = useCallback(() => {
-    setCurrentSchedule(currentSchedule.filter(item => item !== selectedInsertionPoint));
+    if (!selectedInsertionPoint) return;
+
+    const selectedIndex = currentSchedule.findIndex(slot => slot === selectedInsertionPoint);
+    const updatedSchedule = currentSchedule.filter(item => item !== selectedInsertionPoint);
+
+    setCurrentSchedule(updatedSchedule);
+    
+    if (selectedIndex < updatedSchedule.length) {
+      setSelectedInsertionPoint(updatedSchedule[selectedIndex] || null);
+    } else if (updatedSchedule.length > 0) {
+      setSelectedInsertionPoint(updatedSchedule[updatedSchedule.length - 1]);
+    } else {
+      setSelectedInsertionPoint(null);
+    }
   }, [currentSchedule, selectedInsertionPoint]);
 
   return (
@@ -302,6 +315,7 @@ const Scheduler: NextPage<SchedulerProps> = ({ event, categories, scheduledRuns 
         <UnslottedRunList>
           {unslottedRuns.map(run => (
             <UnslottedRunOption
+              key={run.id}
               className={unslottedRunAvailabilityStatuses[run.id] ? 'available' : 'unavailable'}
               isActive={run.id === selectedPendingRun?.id}
             >
