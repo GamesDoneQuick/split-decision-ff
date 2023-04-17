@@ -84,6 +84,10 @@ const Container = styled.div`
   height: 100vh;
   overflow: hidden;
 
+  & .selector__input-container {
+    color: ${SiteConfig.colors.text.light};
+  }
+
   & .selector__option {
     color: ${SiteConfig.colors.text.dark};
   }

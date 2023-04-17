@@ -68,8 +68,12 @@ export const ValidationSchemas = {
     }),
   }).unknown(true),
   VettingInfo: Joi.object<VettingInfo>({
-    twitterAccounts: Joi.string(),
-    twitchAccounts: Joi.string(),
+    twitterAccounts: Joi.string().max(1000).messages({
+      'string.empty': 'You must provide your Twitter accounts or write "none".',
+    }),
+    twitchAccounts: Joi.string().max(1000).messages({
+      'string.empty': 'You must provide your Twitch accounts or write "none".',
+    }),
   }).unknown(true),
   Event: Joi.object<EventWithStringDates<EventWithCommitteeMemberIdsAndNames>>({
     eventName: Joi.string().required().messages({ 'string.empty': 'Event name is required.' }),

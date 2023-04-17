@@ -42,6 +42,20 @@ export type EventWithStringDates<T extends Event = Event> = Omit<T, 'gameSubmiss
   eventStart: string;
 }
 
+export type SchedulableCategory = Prisma.GameSubmissionCategoryGetPayload<{
+  include: {
+    gameSubmission: {
+      include: {
+        user: {
+          include: {
+            eventAvailabilities: true,
+          },
+        },
+      },
+    },
+  },
+}>;
+
 export function prepareAllRecordsForTransfer(records: (Record<string, unknown> | null)[]): (Record<string, unknown> | null)[] {
   return records.map(prepareRecordForTransfer);
 }

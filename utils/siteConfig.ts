@@ -90,8 +90,8 @@ const DEFAULT_CONFIG: SiteConfiguration = {
       darkLabel: '#555',
     },
     error: {
-      background: '#FEECEC',
-      text: '#E05B7B',
+      background: '#592525',
+      text: '#ED9DB0',
       dark: {
         background: '#C4244A',
       },

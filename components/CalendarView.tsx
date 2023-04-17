@@ -214,7 +214,8 @@ const CalendarSlotContainer = styled.div<{ offset: number; height: number; }>`
 
   &:hover {
     height: max-content;
-    z-index: 2;
+    z-index: 4;
+    border: 2px dashed ${SiteConfig.colors.accents.linkDark};
   }
 `;
 

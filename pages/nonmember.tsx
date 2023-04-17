@@ -7,9 +7,9 @@ const NonMemberError: NextPage = () => (
   <div>
     <HeroImage />
 
-    <h1>
+    <ErrorMessage>
       You need to be a member of the {SiteConfig.organizationName} Discord in order to log in.
-    </h1>
+    </ErrorMessage>
   </div>
 );
 
@@ -18,6 +18,12 @@ export default NonMemberError;
 const HeroImage = styled.div`
   width: 600px;
   height: 400px;
-  background-image: url("images/her.png");
+  margin: 1rem auto 0;
+  background-image: url("images/frazzled.png");
   background-size: cover;
+`;
+
+const ErrorMessage = styled.h1`
+  color: ${SiteConfig.colors.text.light};
+  text-align: center;  
 `;

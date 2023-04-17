@@ -12,6 +12,14 @@ export function stringDurationToSeconds(duration: string): number {
   return parts[0] || 0;
 }
 
+export function secondsToStringDuration(value: number): string {
+  const hours = Math.floor(value / 3600);
+  const minutes = Math.floor((value - hours * 3600) / 60);
+  const seconds = value - minutes * 60 - hours * 3600;
+
+  return `${hours}:${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+}
+
 export interface RawDateSegment {
   start: Date;
   end: Date;

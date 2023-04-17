@@ -1,35 +1,23 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import type { NextPage, NextPageContext } from 'next';
-import { Event, Prisma, RunStatus, ScheduledRun } from '@prisma/client';
+import { Event, RunStatus, ScheduledRun } from '@prisma/client';
 import { add, isAfter, isBefore } from 'date-fns';
-import { EventWithCommitteeMemberIdsAndNames, fetchServerSession, prepareAllRecordsForTransfer } from '../../../../utils/models';
+import { EventWithCommitteeMemberIdsAndNames, fetchServerSession, prepareAllRecordsForTransfer, SchedulableCategory } from '../../../../utils/models';
 import { fetchEventWithCommitteeMemberIdsAndNames } from '../../../../utils/dbHelpers';
 import { isMemberOfCommittee } from '../../../../utils/eventHelpers';
 import { CommitteeToolbar } from '../../../../components/CommitteeToolbar';
 import { Alert, Button, FormItem, Label, TextInput } from '../../../../components/layout';
 import { prisma } from '../../../../utils/db';
-import { availabilitySlotsToRawSegments, stringDurationToSeconds } from '../../../../utils/durationHelpers';
+import { availabilitySlotsToRawSegments, secondsToStringDuration, stringDurationToSeconds } from '../../../../utils/durationHelpers';
 import { CalendarSpan, CalendarView } from '../../../../components/CalendarView';
 import { SiteConfig } from '../../../../utils/siteConfig';
 import { mapById } from '../../../../utils/collectionHelpers';
 import { getUserName } from '../../../../utils/userHelpers';
 import { isTimestampValid } from '../../../../utils/validation';
 import { POST_SAVE_OPTS, useSaveable } from '../../../../utils/hooks';
-
-type SchedulableCategory = Prisma.GameSubmissionCategoryGetPayload<{
-  include: {
-    gameSubmission: {
-      include: {
-        user: {
-          include: {
-            eventAvailabilities: true,
-          },
-        },
-      },
-    },
-  },
-}>;
+import { UnslottedRunSelector } from '../../../../components/UnslottedRunSelector';
+import { pluralizeWithValue } from '../../../../utils/humanize';
 
 type ScheduledRunWithCategory = ScheduledRun & { category: SchedulableCategory | null };
 
@@ -79,13 +67,19 @@ function isRunAvailabiltyValid(run: SchedulableCategory, runStart: Date, rawSetu
 function getSlotLabel(slot: CalendarSpan<ScheduledRunWithCategory>) {
   if (!slot.data) return '?';
 
-  if (slot.data.isInterstitial) return slot.data.interstitialName || 'Unnamed interstitial';
+  if (slot.data.isInterstitial) return `${slot.data.interstitialName || 'Unnamed interstitial'} (${slot.data.setupTime})`;
   
   if (!slot.data.category) return 'Unknown run';
 
   return (
     <SlotLabel>
-      {slot.data.category.gameSubmission.gameTitle}
+      <SlotGameTitle>
+        {slot.data.category.gameSubmission.gameTitle}
+        <SlotDuration>
+          {slot.data.category.estimate}
+          <SlotSetupTime>Setup: {slot.data.setupTime}</SlotSetupTime>
+        </SlotDuration>
+      </SlotGameTitle>
       <SlotDetails>
         {slot.data.category.categoryName}
       </SlotDetails>
@@ -242,6 +236,7 @@ const Scheduler: NextPage<SchedulerProps> = ({ event, categories, scheduledRuns 
     }
 
     setSelectedInsertionPoint(newRecord);
+    setSelectedPendingRun(null);
   }, [currentSchedule, selectedInsertionPoint]);
 
   const handleInsertPendingRun = useCallback((addBefore = false) => {
@@ -294,6 +289,44 @@ const Scheduler: NextPage<SchedulerProps> = ({ event, categories, scheduledRuns 
     }
   }, [currentSchedule, selectedInsertionPoint]);
 
+  const sortedUnslottedRuns = useMemo(() => [...unslottedRuns].sort((a, b) => {
+    if (unslottedRunAvailabilityStatuses[a.id] && !unslottedRunAvailabilityStatuses[b.id]) return -1;
+    if (unslottedRunAvailabilityStatuses[b.id] && !unslottedRunAvailabilityStatuses[a.id]) return 1;
+
+    return a.gameSubmission.gameTitle.localeCompare(b.gameSubmission.gameTitle);
+  }), [unslottedRunAvailabilityStatuses, unslottedRuns]);
+
+  const unavailableSlotCount = useMemo(() => calendarItems.reduce((acc, slot) => (
+    acc + ((slot.data && slot.data.categoryId && !currentScheduleAvailabilityStatuses[slot.data.categoryId]) ? 1 : 0)
+  ), 0), [currentScheduleAvailabilityStatuses, calendarItems]);
+
+  const { interstitialDuration, runDuration, setupDuration } = useMemo(() => {
+    const { interstitialSeconds, runSeconds, setupSeconds } = calendarItems.reduce<{ interstitialSeconds: number; runSeconds: number; setupSeconds: number }>((acc, slot) => {
+      if (!slot.data) return acc;
+
+      const setupTime = stringDurationToSeconds(slot.data.setupTime);
+
+      if (slot.data.isInterstitial || !slot.data.category) {
+        return {
+          ...acc,
+          interstitialSeconds: acc.interstitialSeconds + setupTime,
+        };
+      }
+
+      return {
+        ...acc,
+        runSeconds: acc.runSeconds + stringDurationToSeconds(slot.data.category.estimate),
+        setupSeconds: acc.setupSeconds + setupTime,
+      };
+    }, { interstitialSeconds: 0, runSeconds: 0, setupSeconds: 0 });
+
+    return {
+      interstitialDuration: secondsToStringDuration(interstitialSeconds),
+      runDuration: secondsToStringDuration(runSeconds),
+      setupDuration: secondsToStringDuration(setupSeconds),
+    };
+  }, [calendarItems]);
+
   return (
     <Container>
       <CommitteeToolbar event={event} isCommitteeMember activePage="schedule">
@@ -312,22 +345,32 @@ const Scheduler: NextPage<SchedulerProps> = ({ event, categories, scheduledRuns 
         />
       </CalendarSection>
       <EditorSection>
-        <UnslottedRunList>
-          {unslottedRuns.map(run => (
-            <UnslottedRunOption
-              key={run.id}
-              className={unslottedRunAvailabilityStatuses[run.id] ? 'available' : 'unavailable'}
-              isActive={run.id === selectedPendingRun?.id}
-            >
-              <RunOptionInfo onClick={() => setSelectedPendingRun(run)}>
-                <RunOptionTitle>{run.gameSubmission.gameTitle} - {run.categoryName}</RunOptionTitle>
-                <RunOptionRunner>{getUserName(run.gameSubmission.user)}</RunOptionRunner>
-              </RunOptionInfo>
-              <RunOptionDuration>{run.estimate}</RunOptionDuration>
-            </UnslottedRunOption>
-          ))}
-        </UnslottedRunList>
+        <ScheduleInfo>
+          <ScheduleMetrics>
+            <ScheduleMetricsHeader>Runs</ScheduleMetricsHeader>
+            <ScheduleMetricsHeader>Setup</ScheduleMetricsHeader>
+            <ScheduleMetricsHeader>Interstitials</ScheduleMetricsHeader>
+            <div>{runDuration}</div>
+            <div>{setupDuration}</div>
+            <div>{interstitialDuration}</div>
+          </ScheduleMetrics>
+          {unavailableSlotCount === 0 ? (
+            <Alert>No issues detected.</Alert>
+          ) : (
+            <Alert variant="error">
+              {pluralizeWithValue(unavailableSlotCount, 'run does', 'runs do')} not match runner availability.
+            </Alert>
+          )}
+        </ScheduleInfo>
         <InsertRunControls>
+          <FormItem>
+            <UnslottedRunSelector
+              runs={sortedUnslottedRuns}
+              availabilities={unslottedRunAvailabilityStatuses}
+              value={selectedPendingRun}
+              onChange={setSelectedPendingRun}
+            />
+          </FormItem>
           <FormItem>
             <Label htmlFor="runSetupTime">Setup Time</Label>
             <TextInput
@@ -502,59 +545,22 @@ const EditorSection = styled.div`
   display: flex;
   flex-direction: row;
   min-height: 13rem;
-  overflow-y: hidden;
+  overflow-y: visible;
   border-top: 1px solid ${SiteConfig.colors.secondary};
 `;
 
 const CommitteeToolbarTitle = styled.div`
   font-size: 1.5rem;
   font-weight: 700;
-  padding: 0.5rem 0;
+  padding: 0.5rem;
 `;
 
-const UnslottedRunList = styled.div`
+const ScheduleInfo = styled.div`
   display: flex;
   flex-direction: column;
   overflow: auto;
   width: 20rem;
-`;
-
-const UnslottedRunOption = styled.div<{ isActive: boolean}>`
-  display: flex;
-  flex-direction: row;
-  padding: 0.5rem 1rem;
-  background-color: ${({ isActive }) => isActive && 'rgba(255, 255, 255, 0.1)'};
-  cursor: pointer;
-
-  &.unavailable {
-    background: repeating-linear-gradient(
-      45deg,
-      rgba(255, 0, 0, 0),
-      rgba(255, 0, 0, 0) 10px,
-      rgba(255, 0, 0, 0.3) 10px,
-      rgba(255, 0, 0, 0.3) 20px
-    );
-  }
-
-  & + & {
-    border-top: 1px solid ${SiteConfig.colors.secondary};
-  }
-`;
-
-const RunOptionInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  align-self: stretch;
-  min-width: 0;
-`;
-
-const RunOptionTitle = styled.div`
-  font-weight: 700;
-`;
-
-const RunOptionRunner = styled.div`
-  margin-top: 0.25rem;
+  padding: 0.5rem;
 `;
 
 const SlotLabel = styled.div`
@@ -563,6 +569,21 @@ const SlotLabel = styled.div`
 
 const SlotDetails = styled.div`
   font-size: 0.75rem;
+  margin-top: 0.125rem;
+`;
+
+const SlotGameTitle = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const SlotDuration = styled.div`
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
+`;
+
+const SlotSetupTime = styled.div`
   margin-top: 0.125rem;
 `;
 
@@ -605,7 +626,17 @@ const SaveControls = styled.div`
   align-self: stretch;
 `;
 
-const RunOptionDuration = styled.div`
-  margin-top: 0.25rem;
-  font-size: 700;
+const ScheduleMetrics = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  & > div {
+    padding: 0.125rem;
+  }
+`;
+
+const ScheduleMetricsHeader = styled.div`
+  font-weight: 700;
+  font-size: 0.825rem;
+  text-transform: uppercase;
 `;

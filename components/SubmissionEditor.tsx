@@ -82,6 +82,7 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
         description: '',
         runStatus: RunStatus.Pending,
         gameSubmissionId: submission?.id ?? '',
+        scheduleSlotId: null,
         createdAt: null,
         updatedAt: null,
       },
