@@ -46,3 +46,9 @@ export function areIncentivesOpen(event: Event): boolean {
 export function isMemberOfCommittee(event: EventWithCommitteeMemberIdsAndNames, user: User): boolean {
   return event.committeeMembers.some(member => member.id === user.id);
 }
+
+export function canUserViewEvent(event: EventWithCommitteeMemberIdsAndNames, user: User | null): boolean {
+  if (event.visible) return true;
+  
+  return user ? (user.isAdmin || event.committeeMembers.some(member => member.id === user.id)) : false;
+}

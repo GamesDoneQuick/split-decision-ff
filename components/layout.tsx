@@ -330,6 +330,7 @@ export const EventPageTitle = styled.h1`
   font-size: 3.5rem;
   font-weight: 700;
   margin: 0;
+  padding-top: 1rem;
 
   @media screen and (max-width: 800px) {
     flex-direction: column;

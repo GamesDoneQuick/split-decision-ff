@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { unstable_getServerSession } from 'next-auth';
 import { handleAPIRoute } from '../../../utils/apiUtils';
 import { prisma } from '../../../utils/db';
+import { fetchEventsVisibleToUser } from '../../../utils/dbHelpers';
 import { PublicUserData } from '../../../utils/models';
 import { ValidationSchemas } from '../../../utils/validation';
 import { authOptions } from '../auth/[...nextauth]';
@@ -12,20 +13,21 @@ export default async function handle(req: Request, res: Response) {
     GET: async () => {
       const session = await unstable_getServerSession(req, res, authOptions);
 
-      const isAdmin = session?.user.isAdmin ?? false;
+      // const isAdmin = session?.user.isAdmin ?? false;
+      // const filter = {
+      //   where: {
+      //     visible: isAdmin && req.query.includeHidden ? { not: undefined } : true,
+      //   },
+      // };
+      
+      const events = await fetchEventsVisibleToUser(session?.user ?? null);
 
-      const filter = {
-        where: {
-          visible: isAdmin && req.query.includeHidden ? { not: undefined } : true,
-        },
-      };
-
-      const events = await prisma.event.findMany({
-        ...filter,
-        include: {
-          committeeMembers: true,
-        },
-      });
+      // const events = await prisma.event.findMany({
+      //   ...filter,
+      //   include: {
+      //     committeeMembers: true,
+      //   },
+      // });
 
       return res.status(200).json(events);
     },
@@ -71,15 +73,31 @@ export default async function handle(req: Request, res: Response) {
 
       if (validation.error) return res.status(400).json({ message: validation.error.message });
 
-      const result = await prisma.event.upsert({
-        where: {
-          id: req.body.id ?? '',
-        },
-        update: editableData,
-        create: editableData,
-        include: {
-          committeeMembers: true,
-        },
+      const result = await prisma.$transaction(async tx => {
+        if (req.body.id) {
+          // Clear existing committee members
+          await tx.event.update({
+            where: {
+              id: req.body.id ?? '',
+            },
+            data: {
+              committeeMembers: {
+                set: [],
+              },
+            },
+          });
+        }
+        
+        return tx.event.upsert({
+          where: {
+            id: req.body.id ?? '',
+          },
+          update: editableData,
+          create: editableData,
+          include: {
+            committeeMembers: true,
+          },
+        });
       });
 
       return res.status(200).json(result);

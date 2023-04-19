@@ -14,7 +14,7 @@ import { SiteConfig } from '../../../utils/siteConfig';
 import { Button, FormItem, Label, TextInput } from '../../../components/layout';
 import { EventHeader } from '../../../components/EventHeader';
 import { fetchEventWithCommitteeMemberIdsAndNames } from '../../../utils/dbHelpers';
-import { isMemberOfCommittee } from '../../../utils/eventHelpers';
+import { canUserViewEvent, isMemberOfCommittee } from '../../../utils/eventHelpers';
 import { pluralizeWithValue } from '../../../utils/humanize';
 import { stringDurationToSeconds } from '../../../utils/durationHelpers';
 import { CommitteeToolbar } from '../../../components/CommitteeToolbar';
@@ -267,7 +267,7 @@ export async function getServerSideProps(context: NextPageContext) {
 
   const event = await fetchEventWithCommitteeMemberIdsAndNames(context.query.id?.toString() || '');
 
-  if (!event) {
+  if (!event || !canUserViewEvent(event, session?.user ?? null)) {
     return {
       notFound: true,
     };

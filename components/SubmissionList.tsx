@@ -345,9 +345,8 @@ const Username = styled.h2`
 const UserSubmissions = styled.div`
   padding: 1rem;
 
-  &:nth-of-type(2n) {
-    background-color: ${SiteConfig.colors.secondary};
-    color: ${SiteConfig.colors.text.primary};
+  & + & {
+    border-top: 2px solid ${SiteConfig.colors.secondary};
   }
 `;
 
