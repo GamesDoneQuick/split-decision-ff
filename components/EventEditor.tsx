@@ -1,5 +1,5 @@
 import { useSession } from 'next-auth/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Async from 'react-select/async';
 import styled from 'styled-components';
 import { User } from '@prisma/client';
@@ -121,6 +121,11 @@ export const EventEditor: React.FC<EventEditorProps> = ({ event: eventRecord, on
 
     if (response) onSave(response);
   }, [save, validatedEvent.value, onSave]);
+
+  useEffect(() => {
+    // Rehydrate genre list on event selection
+    setRawGenreList(eventRecord.genres.join(', '));
+  }, [eventRecord]);
 
   if (session.status !== 'authenticated') return null;
 
