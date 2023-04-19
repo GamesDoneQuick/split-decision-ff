@@ -372,8 +372,12 @@ const IncentiveDrawer = styled.div`
   padding: 0.5rem;
   border-radius: 0.25rem;
   background-color: ${SiteConfig.colors.accents.alert};
-  color: ${SiteConfig.colors.text.primary};
-  margin-top: 0.5rem;
+  color: ${SiteConfig.colors.text.dark};
+  margin: 0.5rem 0;
+
+  & th {
+    color: ${SiteConfig.colors.text.light};
+  }
 `;
 
 const IncentiveDrawerHead = styled.div`

@@ -3,7 +3,7 @@ import { GameSubmission, GameSubmissionCategory, RunIncentive, User, VettingInfo
 import Joi from 'joi';
 import { EventWithCommitteeMemberIdsAndNames, EventWithStringDates, IncentiveWithCategoryIds } from './models';
 
-const TIMESTAMP_REGEX = /^(?:(?:([0-9]*?\d|2[0-9]):)?([0-5]\d):)?([0-5]\d)$/;
+const TIMESTAMP_REGEX = /^(?:(?:([0-9]*?\d|2[0-9]):)?([0-5]\d):)([0-5]\d)$/;
 
 export function isTimestampValid(value: string) {
   return value.match(TIMESTAMP_REGEX) !== null;

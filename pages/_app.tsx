@@ -24,7 +24,7 @@ const HeaderActions: React.FC = () => {
       {!isLoggedIn && <LoginButton onClick={discordLogin}>Log In with Discord</LoginButton>}
       {isLoggedIn && (
         <Link href="/profile">
-          <a><LoginButton>Submission Manager</LoginButton></a>
+          <a><LoginButton>My Profile & Submissions</LoginButton></a>
         </Link>
       )}
     </HeaderActionsContainer>
