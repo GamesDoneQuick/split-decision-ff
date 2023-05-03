@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 // eslint-disable-next-line camelcase
 import { unstable_getServerSession } from 'next-auth';
 import { Parser } from 'json2csv';
+import { compareAsc } from 'date-fns';
 import { prisma } from '../../../../utils/db';
 import { authOptions } from '../../auth/[...nextauth]';
 import { isMemberOfCommittee } from '../../../../utils/eventHelpers';
@@ -81,7 +82,9 @@ export default async function handle(req: Request, res: Response) {
         return res.status(400).json({ message: 'This event no longer exists; please refresh the page and try again.' });
       }
 
-      if (!session.user.isAdmin && !isMemberOfCommittee(event, session.user)) return res.status(404);
+      const isCommitteeMember = isMemberOfCommittee(event, session.user);
+
+      if (!session.user.isAdmin && !isCommitteeMember) return res.status(404);
 
       const submissions = await prisma.gameSubmission.findMany({
         where: {
@@ -135,6 +138,7 @@ export default async function handle(req: Request, res: Response) {
           contentWarning: submission.contentWarning,
           flashingLights: submission.flashingLights,
           soloCommentary: submission.soloCommentary.toString(),
+          updatedAt: submission.updatedAt,
         };
         
         return submission.categories.map(category => ({
@@ -146,7 +150,14 @@ export default async function handle(req: Request, res: Response) {
         }));
       });
 
-      formattedSubmissions.sort((a, b) => a.userName.localeCompare(b.userName));
+      formattedSubmissions.sort((a, b) => {
+        if (isCommitteeMember) {
+          // Sort by updated for committee
+          return compareAsc(a.updatedAt ?? new Date(0), b.updatedAt ?? new Date(0));
+        }
+  
+        return a.gameTitle.localeCompare(b.gameTitle);
+      });
 
       const parser = new Parser({
         fields: allFields,

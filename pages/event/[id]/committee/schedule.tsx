@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import type { NextPage, NextPageContext } from 'next';
 import { Event, RunStatus, ScheduledRun } from '@prisma/client';
-import { add, isAfter, isBefore } from 'date-fns';
+import { add, differenceInSeconds, isAfter, isBefore, set } from 'date-fns';
 import { EventWithCommitteeMemberIdsAndNames, fetchServerSession, prepareAllRecordsForTransfer, SchedulableCategory } from '../../../../utils/models';
 import { fetchEventWithCommitteeMemberIdsAndNames } from '../../../../utils/dbHelpers';
 import { isMemberOfCommittee } from '../../../../utils/eventHelpers';
@@ -226,7 +226,7 @@ const Scheduler: NextPage<SchedulerProps> = ({ event, categories, scheduledRuns 
     if (selectedInsertionPoint === null) {
       setCurrentSchedule([newRecord, ...currentSchedule]);
     } else {
-      const selectedIndex = currentSchedule.findIndex(slot => slot.categoryId === selectedInsertionPoint.categoryId) + (addBefore ? 0 : 1);
+      const selectedIndex = currentSchedule.findIndex(slot => slot === selectedInsertionPoint) + (addBefore ? 0 : 1);
 
       setCurrentSchedule([
         ...currentSchedule.slice(0, selectedIndex),
@@ -243,15 +243,23 @@ const Scheduler: NextPage<SchedulerProps> = ({ event, categories, scheduledRuns 
     if (!selectedPendingRun) return;
     if (!isRunSetupTimeValid) return;
 
-    insertScheduleItem(createNewSlottedRun(selectedPendingRun, runSetupTime), addBefore); // todo setup time
+    insertScheduleItem(createNewSlottedRun(selectedPendingRun, runSetupTime), addBefore);
   }, [selectedPendingRun, insertScheduleItem, isRunSetupTimeValid, runSetupTime]);
 
   const handleInsertInterstitial = useCallback((addBefore = false) => {
     if (!isInterstitialLengthValid) return;
     if (!interstitialName) return;
 
-    insertScheduleItem(createNewInterstitial(interstitialName, interstitialLength), addBefore); // todo setup time
+    insertScheduleItem(createNewInterstitial(interstitialName, interstitialLength), addBefore);
   }, [insertScheduleItem, interstitialLength, interstitialName, isInterstitialLengthValid]);
+
+  const handleAddSleepBreak = useCallback(() => {
+    // Determine time until start of next day
+    const startOfNextDay = set(add(insertionPointStart, { days: 1 }), { hours: event.startTime, minutes: 0, seconds: 0, milliseconds: 0 });
+    const difference = differenceInSeconds(startOfNextDay, insertionPointStart);
+
+    insertScheduleItem(createNewInterstitial('Sleep', secondsToStringDuration(difference)), false);
+  }, [event.startTime, insertScheduleItem, insertionPointStart]);
 
   const [save, isSaving, saveError] = useSaveable<{ schedule: ScheduledRun[] }, string>(`/api/events/${event.id}/schedule`, true, POST_SAVE_OPTS);
 
@@ -432,9 +440,14 @@ const Scheduler: NextPage<SchedulerProps> = ({ event, categories, scheduledRuns 
               {saveError.message}
             </Alert>
           )}
-          <Button onClick={handleRemoveSelectedRun} disabled={selectedInsertionPoint === null}>
-            Remove Selected Run
-          </Button>
+          <MiscActions>
+            <Button onClick={handleRemoveSelectedRun} disabled={selectedInsertionPoint === null}>
+              Remove Selected Run
+            </Button>
+            <Button onClick={handleAddSleepBreak}>
+              Add Sleep Break
+            </Button>
+          </MiscActions>
           <Button onClick={handleSave} disabled={isSaving}>Save</Button>
         </SaveControls>
       </EditorSection>
@@ -639,4 +652,13 @@ const ScheduleMetricsHeader = styled.div`
   font-weight: 700;
   font-size: 0.825rem;
   text-transform: uppercase;
+`;
+
+const MiscActions = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  & button + button {
+    margin-top: 0.5rem;
+  }
 `;
