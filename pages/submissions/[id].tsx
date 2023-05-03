@@ -38,7 +38,7 @@ function renderSelectorDate(date: Date | null): React.ReactNode {
   if (!date) return <div />;
 
   return (
-    <SelectorDate>{format(date, 'MMM. d')}</SelectorDate>
+    <SelectorDate>{format(date, 'E MMM. d')}</SelectorDate>
   );
 }
 
