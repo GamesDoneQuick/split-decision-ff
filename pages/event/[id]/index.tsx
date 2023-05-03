@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import { normalizeText } from 'normalize-text';
 import Select from 'react-select';
 import { GameSubmissionCategory } from '@prisma/client';
-import { formatDuration, intervalToDuration } from 'date-fns';
+import { compareAsc, formatDuration, intervalToDuration } from 'date-fns';
 import { prisma } from '../../../utils/db';
 import { SubmissionList } from '../../../components/SubmissionList';
 import { CommitteeVisibleSubmission, EventWithCommitteeMemberIdsAndNames, fetchServerSession, prepareRecordForTransfer, SubmissionWithCategoriesAndUsername } from '../../../utils/models';
@@ -307,7 +307,14 @@ export async function getServerSideProps(context: NextPageContext) {
       };
     }
 
-    normalizedSubmission.categories.sort((a, b) => a.categoryName.localeCompare(b.categoryName));
+    normalizedSubmission.categories.sort((a, b) => {
+      if (isCommitteeMember) {
+        // Sort by updated for committee
+        return compareAsc(a.updatedAt ?? new Date(0), b.updatedAt ?? new Date(0));
+      }
+
+      return a.categoryName.localeCompare(b.categoryName);
+    });
     
     return [...acc, normalizedSubmission];
   }, [] as SubmissionWithCategoriesAndUsername[] | CommitteeVisibleSubmission[]);
