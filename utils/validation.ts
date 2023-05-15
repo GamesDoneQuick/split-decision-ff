@@ -115,6 +115,7 @@ export const ValidationSchemas = {
     genres: Joi.array().items(Joi.string()).min(1).messages({
       'array.min': 'At least one genre must be specified',
     }),
+    committeeDiscordChannelId: Joi.string().allow('').allow(null),
     visible: Joi.boolean(),
   }).unknown(true),
   GameSubmissionCategory: GameSubmissionCategoryValidationSchema,

@@ -96,6 +96,7 @@ model Event {
   maxIncentives                Int                 @default(5)
   genres                       String[]            @default([])
   firstRunId                   String?
+  committeeDiscordChannelId    String?
   gameSubmissions              GameSubmission[]
   eventAvailabilities          EventAvailability[]
   committeeMembers             User[]
@@ -131,7 +132,7 @@ model GameSubmission {
   contentWarning String?
   flashingLights Boolean                  @default(false)
   soloCommentary Boolean                  @default(false)
-  
+
   user           User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
   categories     GameSubmissionCategory[]
   incentives     RunIncentive[]

@@ -27,6 +27,7 @@ interface CategoryRowProps {
 
 const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incentives, isCommitteeMember }) => {
   const [showIncentives, setShowIncentives] = useState(false);
+  const [hasOpenedCommitteeVote, setHasOpenedCommitteeVote] = useState(false);
 
   const handleToggleShowIncentives = useCallback(() => setShowIncentives(!showIncentives), [showIncentives]);
   const [runStatus, setRunStatus] = useState(category.runStatus);
@@ -38,6 +39,11 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incenti
 
     await save({ status: event.target.value });
   }, [save]);
+
+  const handleStartCommitteeVote = useCallback((categoryId: string) => {
+    setHasOpenedCommitteeVote(true);
+    fetch(`/api/events/${submission.eventId}/categories/${categoryId}/vote`, { method: 'POST' });
+  }, [submission.eventId]);
 
   return (
     <tr key={category.id}>
@@ -109,18 +115,25 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incenti
         )}
       </DescriptionCell>
       {isCommitteeMember && (
-        <td width="10%">
-          <StatusSelector disabled={isSaving} value={runStatus} onChange={handleChangeStatus}>
-            {RUN_STATUS_OPTIONS.map(option => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </StatusSelector>
-          {saveError.error && (
-            <Alert variant="error">
-              Could not save status: {saveError.message}
-            </Alert>
-          )}
-        </td>
+        <>
+          <td width="10%">
+            <StatusSelector disabled={isSaving} value={runStatus} onChange={handleChangeStatus}>
+              {RUN_STATUS_OPTIONS.map(option => (
+                <option key={option} value={option}>{option}</option>
+              ))}
+            </StatusSelector>
+            {saveError.error && (
+              <Alert variant="error">
+                Could not save status: {saveError.message}
+              </Alert>
+            )}
+          </td>
+          <td width="10%">
+            <Button onClick={() => handleStartCommitteeVote(category.id)} disabled={hasOpenedCommitteeVote}>
+              Open Vote
+            </Button>
+          </td>
+        </>
       )}
     </tr>
   );
@@ -185,7 +198,12 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({ submission, isCom
               <th>Category</th>
               <th>Estimate</th>
               <th>Description</th>
-              {isCommitteeMember && <th>Status</th>}
+              {isCommitteeMember && (
+                <>
+                  <th>Status</th>
+                  <th>&nbsp;</th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody>

@@ -64,6 +64,7 @@ export default async function handle(req: Request, res: Response) {
         visible: req.body.visible,
         runStatusVisible: req.body.runStatusVisible,
         genres: req.body.genres,
+        committeeDiscordChannelId: req.body.committeeDiscordChannelId,
         committeeMembers: {
           connect: (req.body.committeeMembers as PublicUserData[]).map(member => ({ id: member.id })),
         },

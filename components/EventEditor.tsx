@@ -75,6 +75,10 @@ export const EventEditor: React.FC<EventEditorProps> = ({ event: eventRecord, on
     setEventField('eventStart', event.target.value);
   }, [setEventField]);
 
+  const handleUpdateCommitteeDiscordChannelId = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setEventField('committeeDiscordChannelId', event.target.value);
+  }, [setEventField]);
+
   const handleUpdateMaxSubmissions = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setEventField('maxSubmissions', Number(event.target.value));
   }, [setEventField]);
@@ -287,6 +291,15 @@ export const EventEditor: React.FC<EventEditorProps> = ({ event: eventRecord, on
           classNamePrefix="selector"
           onChange={handleUpdateCommittee}
           isMulti
+        />
+      </FormItem>
+      <FormItem>
+        <Label htmlFor="committeeDiscordChannelId">Committee Discord Channel ID</Label>
+        <TextInput
+          id="committeeDiscordChannelId"
+          value={validatedEvent.value.committeeDiscordChannelId || ''}
+          error={validatedEvent.error?.committeeDiscordChannelId}
+          onChange={handleUpdateCommitteeDiscordChannelId}
         />
       </FormItem>
       <FormItemWithDivider>

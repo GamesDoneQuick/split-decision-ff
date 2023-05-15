@@ -60,8 +60,8 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
     setSubmissionField('flashingLights', value);
   }, [setSubmissionField]);
 
-  const handleUpdateSoloCommentary = useCallback((value: boolean) => {
-    setSubmissionField('soloCommentary', value);
+  const handleUpdateSoloCommentary = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSubmissionField('soloCommentary', Boolean(event.target.value));
   }, [setSubmissionField]);
 
   const handleCategoryUpdate = useCallback((value: GameSubmissionCategory, index: number) => {
@@ -219,30 +219,33 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
       <Separator />
       <Instructions>Commentary</Instructions>
       <CommentaryInstructions>
-        Runs in Frame Fatales events must use one of these three commentary options:
+        <p>
+          Commentary is an important part of every Flame Fatales run!
+          The Games Committee takes the quality of your commentary into account when
+          reviewing your submission. Please select one of the following commentary options for your run:
+        </p>
 
-        <ol>
-          <li>Inviting one or more commentators eligible for Frame Fatales server membership</li>
-          <li>A Commentary Buddy volunteer who assists you in commentating</li>
-          <li>Solo commentary</li>
-        </ol>
+        <p>
+          <CommentaryTypeLabel>Community Commentator</CommentaryTypeLabel>
+          A commentator of your choosing (who fits the FF Discord criteria) or a
+          Frame Fatales Commentary Buddy volunteer – someone from the server who
+          will learn your run and join your virtual couch during your run! Having a
+          friend can help take the pressure off while you&apos;re on your blazing pace 🔥
+          If you choose this option and your chosen commentator ends up unavailable for your
+          run, don&apos;t stress, you will get paired up with a Commentary Buddy!
+        </p>
 
-        If you plan to use option 3 (Solo Commentary) if this submission is accepted, enable the toggle below.
-        By doing so, you recognize that the Frame Fatales Games Committee will more heavily consider the quality
-        of the commentary in your submission video when deciding whether or not to include your run.
-      </CommentaryInstructions>
-      <CommentaryInstructions>
-        If you do not enable this toggle, you are expected to provide commentators for your run or request a
-        Commentary Buddy. If your desired commentators are unavailable, the Frame Fatales event staff will pair
-        you with a Commentary Buddy.
+        <p>
+          <CommentaryTypeLabel>Solo Commentary</CommentaryTypeLabel>
+          You want to provide your own commentary for your run. If you want to go solo, we will be
+          looking for top-notch commentary on your submission to see if you can bring the heat 🔥
+        </p>
       </CommentaryInstructions>
       <FormItem>
-        <ToggleSwitch
-          toggled={validatedSubmission.value.soloCommentary}
-          onChange={handleUpdateSoloCommentary}
-        >
-          I plan to solo commentate this run.
-        </ToggleSwitch>
+        <SelectInput value={validatedSubmission.value.soloCommentary.toString()} onChange={handleUpdateSoloCommentary}>
+          <option value="false">Community Commentator</option>
+          <option value="true">Solo Commentary</option>
+        </SelectInput>
       </FormItem>
       <CategoryList>
         <Instructions>Categories ({validatedSubmission.value.categories.length})</Instructions>
@@ -316,4 +319,10 @@ const CommentaryInstructions = styled.p`
   line-height: 1.2;
   font-size: 1rem;
   margin-top: 0;
+`;
+
+const CommentaryTypeLabel = styled.h4`
+  font-weight: 700;
+  margin: 0 0 0.125rem;
+  font-size: 1.125rem;
 `;

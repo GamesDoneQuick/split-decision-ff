@@ -32,6 +32,7 @@ function createEmptyEvent(): EventWithCommitteeMemberIdsAndNames {
     maxIncentives: 5,
     genres: [],
     committeeMembers: [],
+    committeeDiscordChannelId: null,
     firstRunId: null,
     createdAt: null,
     updatedAt: null,
