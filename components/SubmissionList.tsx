@@ -27,7 +27,7 @@ interface CategoryRowProps {
 
 const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incentives, isCommitteeMember }) => {
   const [showIncentives, setShowIncentives] = useState(false);
-  const [hasOpenedCommitteeVote, setHasOpenedCommitteeVote] = useState(false);
+  const [hasOpenedCommitteeVote, setHasOpenedCommitteeVote] = useState(category.isCommitteeVoteOpened);
 
   const handleToggleShowIncentives = useCallback(() => setShowIncentives(!showIncentives), [showIncentives]);
   const [runStatus, setRunStatus] = useState(category.runStatus);
@@ -128,9 +128,9 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incenti
               </Alert>
             )}
           </td>
-          <td width="10%">
+          <td width="15%">
             <Button onClick={() => handleStartCommitteeVote(category.id)} disabled={hasOpenedCommitteeVote}>
-              Open Vote
+              {hasOpenedCommitteeVote ? 'Vote opened' : 'Open Vote'}
             </Button>
           </td>
         </>

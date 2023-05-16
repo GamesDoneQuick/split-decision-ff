@@ -81,6 +81,15 @@ export default async function handle(req: Request, res: Response) {
       await message.react('❌');
       await message.react('🤷‍♀️');
 
+      await prisma.gameSubmissionCategory.update({
+        where: {
+          id: req.query.categoryId as string,
+        },
+        data: {
+          isCommitteeVoteOpened: true,
+        },
+      });
+
       return res.status(200).json(true);
     },
   });
