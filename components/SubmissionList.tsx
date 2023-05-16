@@ -159,7 +159,12 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({ submission, isCom
 
   return (
     <SubmissionDetailsContainer>
-      <GameTitle>{submission.gameTitle}</GameTitle>
+      <GameTitle>
+        {submission.gameTitle}
+        {isCommitteeMember && submission.soloCommentary && (
+          <SoloCommentaryBadge>Solo Commentary</SoloCommentaryBadge>
+        )}
+      </GameTitle>
       <GameDetailsGridRow>
         <GameDetails>
           <GameDetailsKey>Genre</GameDetailsKey>
@@ -421,6 +426,12 @@ const IncentiveList = styled.div`
 const VisibilityBadge = styled(Badge)`
   background-color: ${SiteConfig.colors.secondary};
   color: ${SiteConfig.colors.text.light};
+`;
+
+const SoloCommentaryBadge = styled(Badge)`
+  background-color: ${SiteConfig.colors.status.backup};
+  color: ${SiteConfig.colors.text.light};
+  font-family: 'Lexend', sans-serif;
 `;
 
 const StatusBadge = styled(Badge)<{ status: RunStatus }>`
