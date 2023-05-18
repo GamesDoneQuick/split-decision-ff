@@ -61,7 +61,7 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
   }, [setSubmissionField]);
 
   const handleUpdateSoloCommentary = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSubmissionField('soloCommentary', Boolean(event.target.value));
+    setSubmissionField('soloCommentary', event.target.value === 'true');
   }, [setSubmissionField]);
 
   const handleCategoryUpdate = useCallback((value: GameSubmissionCategory, index: number) => {
