@@ -21,6 +21,14 @@ import { CommitteeToolbar } from '../../../components/CommitteeToolbar';
 
 type CategoryContainingRecord = { categories: GameSubmissionCategory[] }[];
 
+function sortAsCommitteeMember(a: SubmissionWithCategoriesAndUsername | CommitteeVisibleSubmission, b: SubmissionWithCategoriesAndUsername | CommitteeVisibleSubmission): number {
+  return Math.max(...b.categories.map(x => x.createdAt?.getTime() ?? Number.MIN_SAFE_INTEGER)) - Math.max(...a.categories.map(x => x.createdAt?.getTime() ?? Number.MIN_SAFE_INTEGER));
+}
+
+function sortAsGenericUser(a: SubmissionWithCategoriesAndUsername | CommitteeVisibleSubmission, b: SubmissionWithCategoriesAndUsername | CommitteeVisibleSubmission): number {
+  return a.gameTitle.localeCompare(b.gameTitle);
+}
+
 function getCategoryCount(list: CategoryContainingRecord) {
   return list.reduce((acc, item) => acc + item.categories.length, 0);
 }
@@ -312,7 +320,9 @@ export async function getServerSideProps(context: NextPageContext) {
     return [...acc, normalizedSubmission];
   }, [] as SubmissionWithCategoriesAndUsername[] | CommitteeVisibleSubmission[]);
 
-  visibleSubmissions.sort((a, b) => a.gameTitle.localeCompare(b.gameTitle));
+  const sortMethod = isCommitteeMember ? sortAsCommitteeMember : sortAsGenericUser;
+
+  visibleSubmissions.sort(sortMethod);
 
   return {
     props: {
