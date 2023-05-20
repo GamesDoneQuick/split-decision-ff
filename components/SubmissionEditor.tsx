@@ -7,7 +7,7 @@ import { SubmissionWithCategories } from '../utils/models';
 import { SiteConfig } from '../utils/siteConfig';
 import { useValidatedState, ValidationSchemas } from '../utils/validation';
 import { CategoryEditor } from './CategoryEditor';
-import { Button, FormItem, Label, TextInput, Alert, TextAreaInput, SelectInput, ToggleSwitch } from './layout';
+import { Button, FormItem, Label, TextInput, Alert, TextAreaInput, SelectInput, ToggleSwitch, HelpText } from './layout';
 
 interface SubmissionEditorProps {
   event: Event,
@@ -204,6 +204,7 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
           maxLength={100}
           onChange={handleUpdateContentWarning}
         />
+        <HelpText>Please treat content warnings seriously.</HelpText>
       </FormItem>
       <FormItem>
         <Label htmlFor="technicalNotes">Technical Notes</Label>
