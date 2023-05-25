@@ -164,6 +164,7 @@ enum RunStatus {
   Backup
   Bonus
   Pending
+  Coop
 }
 
 model RunIncentive {

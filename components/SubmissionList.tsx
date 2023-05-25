@@ -14,6 +14,7 @@ const RUN_STATUS_OPTIONS = [
   RunStatus.Bonus,
   RunStatus.Pending,
   RunStatus.Declined,
+  RunStatus.Coop,
 ];
 
 type SubmissionRecord = SubmissionWithCategories | SubmissionWithCategoriesAndUsername | CommitteeVisibleSubmission;
