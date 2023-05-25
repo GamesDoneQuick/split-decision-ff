@@ -82,6 +82,7 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
         const validCategories: GameSubmissionCategory[] = item.categories.filter(category => {
           switch (category.runStatus) {
             case 'Accepted':
+            case 'Coop':
             case 'Bonus':
               return showAccepted;
             
@@ -305,7 +306,7 @@ export async function getServerSideProps(context: NextPageContext) {
     let normalizedSubmission: SubmissionWithCategoriesAndUsername | CommitteeVisibleSubmission = submission;
 
     if (!event.runStatusVisible && !isCommitteeMember) {
-      // Blank out all statuses if run statuses are not visible and this is not a committee member.j
+      // Blank out all statuses if run statuses are not visible and this is not a committee member.
       normalizedSubmission = {
         ...submission,
         categories: submission.categories.map(category => ({
