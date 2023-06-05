@@ -121,6 +121,12 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
     return formatDuration(intervalToDuration({ start: 0, end: seconds }), { delimiter: ', ' });
   }, [filteredSubmissions]);
 
+  const filteredIncentiveCount = useMemo(() => {
+    if (!isCommitteeMember) return 0;
+  
+    return (filteredSubmissions as CommitteeVisibleSubmission[]).reduce((acc, item) => acc + item.incentives.length, 0);
+  }, [filteredSubmissions, isCommitteeMember]);
+
   const subcommitteeOptions = useMemo(() => event.genres.map(label => ({
     value: label,
     label,
@@ -264,6 +270,7 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
       </SubmissionListContainer>
       <SubmissionTotal>
         Showing {filteredCategoryCount} of {pluralizeWithValue(allCategoryCount, 'category', 'categories')} ({filteredCategoryDuration})
+        {isCommitteeMember && ` (${pluralizeWithValue(filteredIncentiveCount, 'incentive')})`}
       </SubmissionTotal>
     </Container>
   );
