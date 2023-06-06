@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Event } from '@prisma/client';
-import { intlFormat, intlFormatDistance } from 'date-fns';
+import { compareAsc, intlFormat, intlFormatDistance, isBefore } from 'date-fns';
 import { utcToZonedTime } from 'date-fns-tz';
 import { Alert } from './layout';
 import { areSubmissionsOpen, forceAsDate, isAfterSubmissionPeriod, isBeforeSubmissionPeriod } from '../utils/eventHelpers';
@@ -36,6 +36,10 @@ export function getEventSubmissionTimeString(event: Event, includeAbsoluteDate =
   return `Submissions close ${intlFormatDistance(endDate, now)}${absoluteDate}`;
 }
 
+function sortEventList(list: Event[]): Event[] {
+  return list.sort((a, b) => compareAsc(forceAsDate(a.eventStart), forceAsDate(b.eventStart)));
+}
+
 interface EventItemProps {
   event: Event;
   onClick: (id: string) => void;
@@ -45,6 +49,8 @@ const EventItem: React.FC<EventItemProps> = ({ event, onClick }) => {
   const submissionTime = useMemo(() => getEventSubmissionTimeString(event), [event]);
 
   const eventStart = useMemo(() => intlFormat(forceAsDate(event.eventStart)), [event.eventStart]);
+
+  const wasEventInPast = useMemo(() => isBefore(forceAsDate(event.eventStart), Date.now()), [event.eventStart]);
 
   const handleClick = useCallback(() => {
     onClick(event.id);
@@ -56,7 +62,7 @@ const EventItem: React.FC<EventItemProps> = ({ event, onClick }) => {
         <EventItemContainer>
           <EventInfo>
             {event.eventName}{!event.visible && <i>&nbsp;(Hidden)</i>}
-            <SubmissionTime>Begins on {eventStart}</SubmissionTime>
+            <SubmissionTime>{wasEventInPast ? 'Began' : 'Begins'} on {eventStart}</SubmissionTime>
           </EventInfo>
           <EventStartDate>{submissionTime}</EventStartDate>
         </EventItemContainer>
@@ -102,11 +108,21 @@ export const EventList: React.FC<EventListProps> = ({ events: propEvents, onClic
     if (propEvents) setEvents(propEvents);
   }, [propEvents]);
 
-  const [openEvents, pendingEvents, closedEvents] = useMemo(() => events.reduce<[Event[], Event[], Event[]]>(([open, pending, closed], event) => {
-    if (areSubmissionsOpen(event)) return [[...open, event], pending, closed];
-    if (isBeforeSubmissionPeriod(event)) return [open, [...pending, event], closed];
-    return [open, pending, [...closed, event]];
-  }, [[], [], []]), [events]);
+  const [openEvents, pendingEvents, upcomingEvents, pastEvents] = useMemo(() => {
+    const [openUnsorted, pendingUnsorted, upcomingUnsorted, pastUnsorted] = events.reduce<[Event[], Event[], Event[], Event[]]>(([open, pending, upcoming, past], event) => {
+      if (areSubmissionsOpen(event)) return [[...open, event], pending, upcoming, past];
+      if (isBeforeSubmissionPeriod(event)) return [open, [...pending, event], upcoming, past];
+      if (isBefore(forceAsDate(event.eventStart), Date.now())) return [open, pending, upcoming, [...past, event]];
+      return [open, pending, [...upcoming, event], past];
+    }, [[], [], [], []]);
+    
+    return [
+      sortEventList(openUnsorted),
+      sortEventList(pendingUnsorted),
+      sortEventList(upcomingUnsorted),
+      sortEventList(pastUnsorted),
+    ];
+  }, [events]);
 
   return (
     <Container>
@@ -115,6 +131,15 @@ export const EventList: React.FC<EventListProps> = ({ events: propEvents, onClic
 
       {!isLoading && !!error && (
         <Alert variant="error">{error}</Alert>
+      )}
+
+      {!isLoading && upcomingEvents.length > 0 && (
+        <EventListSection>
+          <EventListTitle>Upcoming events</EventListTitle>
+          <EventListElement>
+            {upcomingEvents.map(event => <EventItem key={event.id} event={event} onClick={onClick} />)}
+          </EventListElement>
+        </EventListSection>
       )}
 
       {!isLoading && openEvents.length > 0 && (
@@ -135,11 +160,11 @@ export const EventList: React.FC<EventListProps> = ({ events: propEvents, onClic
         </EventListSection>
       )}
 
-      {!isLoading && closedEvents.length > 0 && (
+      {!isLoading && upcomingEvents.length > 0 && (
         <EventListSection>
-          <EventListTitle>Submissions closed</EventListTitle>
+          <EventListTitle>Past events</EventListTitle>
           <EventListElement>
-            {closedEvents.map(event => <EventItem key={event.id} event={event} onClick={onClick} />)}
+            {pastEvents.map(event => <EventItem key={event.id} event={event} onClick={onClick} />)}
           </EventListElement>
         </EventListSection>
       )}
