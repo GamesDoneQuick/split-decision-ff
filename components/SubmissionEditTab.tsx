@@ -86,7 +86,7 @@ export const SubmissionEditTab: React.FC<SubmissionEditTabProps> = ({ event, sub
         {!allowSubmissions && (
           <div>
             {submissions.length === 0 && <Alert>You have no submissions for {event.eventName}.</Alert>}
-            {submissions.length > 0 && <SubmissionList submissions={submissions} />}
+            {submissions.length > 0 && <SubmissionList event={event} submissions={submissions} />}
           </div>
         )}
         

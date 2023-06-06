@@ -266,7 +266,7 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
         </FilterContainer>
       </WelcomeMessageContainer>
       <SubmissionListContainer>
-        <SubmissionList submissions={filteredSubmissions} showUsernames isCommitteeMember={isCommitteeMember} />
+        <SubmissionList event={event} submissions={filteredSubmissions} showUsernames isCommitteeMember={isCommitteeMember} />
       </SubmissionListContainer>
       <SubmissionTotal>
         Showing {filteredCategoryCount} of {pluralizeWithValue(allCategoryCount, 'category', 'categories')} ({filteredCategoryDuration})

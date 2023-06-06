@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { GameSubmission, GameSubmissionCategory, RunStatus } from '@prisma/client';
+import { Event, GameSubmission, GameSubmissionCategory, RunStatus } from '@prisma/client';
 import { Alert, Badge, Button, SelectInput } from './layout';
 import { CommitteeVisibleSubmission, IncentiveWithCategories, SubmissionWithCategories, SubmissionWithCategoriesAndUsername } from '../utils/models';
 import { SiteConfig } from '../utils/siteConfig';
@@ -18,6 +18,45 @@ const RUN_STATUS_OPTIONS = [
 ];
 
 type SubmissionRecord = SubmissionWithCategories | SubmissionWithCategoriesAndUsername | CommitteeVisibleSubmission;
+
+interface GenreSelectorProps {
+  event: Event;
+  submission: GameSubmission;
+  field: 'primaryGenre' | 'secondaryGenre';
+  isCommitteeMember: boolean;
+}
+
+const GenreSelector: React.FC<GenreSelectorProps> = ({ event: eventRecord, submission, field, isCommitteeMember }) => {
+  const [value, setValue] = useState(submission[field] || '');
+
+  const handleGenreSelected = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
+    setValue(event.target.value);
+    fetch(`/api/events/${submission.eventId}/submissions/${submission.id}/genre`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        field,
+        value: event.target.value,
+      }),
+    });
+  }, [submission.eventId, submission.id, field]);
+
+  if (!isCommitteeMember) return <span>{submission[field]}</span>;
+  
+  return (
+    <select
+      onChange={handleGenreSelected}
+      value={value}
+    >
+      {field === 'secondaryGenre' && <option value="">(None)</option>}
+      {eventRecord.genres.map(option => (
+        <option key={option} value={option}>{option}</option>
+      ))}
+    </select>
+  );
+};
 
 interface CategoryRowProps {
   submission: GameSubmission,
@@ -140,11 +179,12 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incenti
   );
 };
 interface SubmissionDetailsProps {
+  event: Event;
   submission: SubmissionRecord;
   isCommitteeMember: boolean;
 }
 
-const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({ submission, isCommitteeMember = false }) => {
+const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({ event: eventRecord, submission, isCommitteeMember = false }) => {
   const incentivesPerCategory = useMemo(() => {
     if (!isCommitteeMember || !('incentives' in submission)) return {};
 
@@ -169,11 +209,21 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({ submission, isCom
       <GameDetailsGridRow>
         <GameDetails>
           <GameDetailsKey>Genre</GameDetailsKey>
-          <div>{submission.primaryGenre}</div>
+          <GenreSelector
+            field="primaryGenre"
+            event={eventRecord}
+            submission={submission}
+            isCommitteeMember={isCommitteeMember}
+          />
         </GameDetails>
         <GameDetails>
           <GameDetailsKey>Subgenre</GameDetailsKey>
-          <div>{submission.secondaryGenre}</div>
+          <GenreSelector
+            field="secondaryGenre"
+            event={eventRecord}
+            submission={submission}
+            isCommitteeMember={isCommitteeMember}
+          />
         </GameDetails>
         <GameDetails>
           <GameDetailsKey>Platform</GameDetailsKey>
@@ -235,12 +285,13 @@ interface SubmissionUserData {
 }
 
 interface SubmissionListProps {
+  event: Event;
   submissions: SubmissionRecord[];
   showUsernames?: boolean;
   isCommitteeMember?: boolean;
 }
 
-export const SubmissionList: React.FC<SubmissionListProps> = ({ submissions, showUsernames = false, isCommitteeMember = false }) => {
+export const SubmissionList: React.FC<SubmissionListProps> = ({ event: eventRecord, submissions, showUsernames = false, isCommitteeMember = false }) => {
   const [groupedUsernames, groupedSubmissions] = useMemo(() => (
     submissions.reduce(([usernameMapping, submissionMapping], submission) => [
       {
@@ -269,7 +320,14 @@ export const SubmissionList: React.FC<SubmissionListProps> = ({ submissions, sho
               )}
             </Username>
           )}
-          {list.map(submission => <SubmissionDetails key={submission.id} submission={submission} isCommitteeMember={isCommitteeMember} />)}
+          {list.map(submission => (
+            <SubmissionDetails
+              key={submission.id}
+              event={eventRecord}
+              submission={submission}
+              isCommitteeMember={isCommitteeMember}
+            />
+          ))}
         </UserSubmissions>
       ))}
     </Container>

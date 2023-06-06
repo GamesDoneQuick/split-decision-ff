@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 // eslint-disable-next-line camelcase
 import { unstable_getServerSession } from 'next-auth';
-import { prisma } from '../../../../../utils/db';
-import { areSubmissionsOpen, isMemberOfCommittee } from '../../../../../utils/eventHelpers';
-import { fetchEventWithCommitteeMemberIdsAndNames } from '../../../../../utils/dbHelpers';
-import { authOptions } from '../../../auth/[...nextauth]';
-import { handleAPIRoute } from '../../../../../utils/apiUtils';
+import { prisma } from '../../../../../../utils/db';
+import { areSubmissionsOpen, isMemberOfCommittee } from '../../../../../../utils/eventHelpers';
+import { fetchEventWithCommitteeMemberIdsAndNames } from '../../../../../../utils/dbHelpers';
+import { authOptions } from '../../../../auth/[...nextauth]';
+import { handleAPIRoute } from '../../../../../../utils/apiUtils';
 
 export default async function handle(req: Request, res: Response) {
   await handleAPIRoute(req, res, {
