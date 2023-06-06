@@ -77,6 +77,8 @@ export default async function handle(req: Request, res: Response) {
         );
     
       const message = await matchingThread.send({ embeds: [embed] });
+
+      await message.pin();
     
       await message.react('✅');
       await message.react('❌');
