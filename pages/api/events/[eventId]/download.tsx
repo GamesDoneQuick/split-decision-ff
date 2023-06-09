@@ -15,6 +15,7 @@ interface ExportedSubmissionRow {
   email: string;
   showPronouns: string;
   availability: string;
+  runStatus: string;
   gameTitle: string;
   platform: string;
   description: string;
@@ -36,6 +37,7 @@ const EXPORTED_SUBMISSION_FIELDS: [keyof ExportedSubmissionRow, string][] = [
   ['email', 'Email'],
   ['showPronouns', 'Show pronouns?'],
   ['availability', 'Availability'],
+  ['runStatus', 'Status'],
   ['gameTitle', 'Game Title'],
   ['platform', 'Platform'],
   ['description', 'Description'],
@@ -143,6 +145,7 @@ export default async function handle(req: Request, res: Response) {
         
         return submission.categories.map(category => ({
           ...baseData,
+          runStatus: category.runStatus,
           categoryName: category.categoryName,
           url: category.videoURL,
           estimate: normalizeEstimate(category.estimate),
