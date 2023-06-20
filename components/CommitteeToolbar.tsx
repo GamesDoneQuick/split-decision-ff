@@ -21,6 +21,11 @@ const TOOLKIT_PAGES: ToolkitPage[] = [
     link: '/committee/availability',
   },
   {
+    id: 'editor',
+    name: 'Run Editor',
+    link: '/committee/editor',
+  },
+  {
     id: 'schedule',
     name: 'Schedule',
     link: '/committee/schedule',

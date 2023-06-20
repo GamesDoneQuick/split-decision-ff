@@ -4,7 +4,7 @@ import { unstable_getServerSession } from 'next-auth';
 import { handleAPIRoute } from '../../../../../utils/apiUtils';
 import { prisma } from '../../../../../utils/db';
 import { fetchEventWithCommitteeMemberIdsAndNames } from '../../../../../utils/dbHelpers';
-import { areIncentivesOpen, isMemberOfCommittee } from '../../../../../utils/eventHelpers';
+import { areIncentivesOpen, isMemberOfCommittee, userMatchesOrIsCommittee } from '../../../../../utils/eventHelpers';
 import { authOptions } from '../../../auth/[...nextauth]';
 
 export default async function handle(req: Request, res: Response) {
@@ -35,7 +35,7 @@ export default async function handle(req: Request, res: Response) {
         return res.status(400).json({ message: 'This incentive no longer exists; please refresh the page and try again.' });
       }
 
-      if (existingRecord.gameSubmission.userId !== session.user.id) {
+      if (!userMatchesOrIsCommittee(session, existingRecord.gameSubmission.userId, event)) {
         return res.status(401).json({ message: 'You do not have access to this incentive.' });
       }
 

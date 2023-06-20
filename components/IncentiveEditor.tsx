@@ -2,7 +2,7 @@ import { useSession } from 'next-auth/react';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import Select from 'react-select';
-import { GameSubmissionCategory } from '@prisma/client';
+import { GameSubmissionCategory, User } from '@prisma/client';
 import { POST_SAVE_OPTS, useSaveable } from '../utils/hooks';
 import { IncentiveWithCategories, IncentiveWithCategoryIds, SubmissionWithCategories } from '../utils/models';
 import { SiteConfig } from '../utils/siteConfig';
@@ -16,13 +16,14 @@ function mapCategories(submission: SubmissionWithCategories, categoryIds: string
 }
 
 interface IncentiveEditorProps {
+  user: User;
   submission: SubmissionWithCategories;
   incentive: IncentiveWithCategoryIds;
   onDelete: (id: string) => void;
   onSave: (value: IncentiveWithCategories) => void;
 }
 
-export const IncentiveEditor: React.FC<IncentiveEditorProps> = ({ submission, incentive, onDelete, onSave }) => {
+export const IncentiveEditor: React.FC<IncentiveEditorProps> = ({ user, submission, incentive, onDelete, onSave }) => {
   const session = useSession();
 
   const [validatedIncentive, setIncentiveField] = useValidatedState(incentive, ValidationSchemas.RunIncentiveWithCategoryIds);
@@ -54,13 +55,16 @@ export const IncentiveEditor: React.FC<IncentiveEditorProps> = ({ submission, in
     setIncentiveField('attachedCategories', categoryIds);
   }, [setIncentiveField]);
   
-  const [save, isSaving, saveError] = useSaveable<IncentiveWithCategoryIds, IncentiveWithCategories>(`/api/events/${submission.eventId}/incentives`, !validatedIncentive.error, POST_SAVE_OPTS);
+  const [save, isSaving, saveError] = useSaveable<IncentiveWithCategoryIds & { userId: string }, IncentiveWithCategories>(`/api/events/${submission.eventId}/incentives`, !validatedIncentive.error, POST_SAVE_OPTS);
   
   const handleSave = useCallback(async () => {
-    const response = await save(validatedIncentive.value);
+    const response = await save({
+      ...validatedIncentive.value,
+      userId: user.id,
+    });
 
     if (response) onSave(response);
-  }, [save, validatedIncentive.value, onSave]);
+  }, [save, validatedIncentive.value, user.id, onSave]);
 
   if (session.status !== 'authenticated') return null;
 

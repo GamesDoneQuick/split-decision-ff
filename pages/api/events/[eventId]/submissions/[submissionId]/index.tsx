@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 // eslint-disable-next-line camelcase
 import { unstable_getServerSession } from 'next-auth';
 import { prisma } from '../../../../../../utils/db';
-import { areSubmissionsOpen, isMemberOfCommittee } from '../../../../../../utils/eventHelpers';
+import { areSubmissionsOpen, isMemberOfCommittee, userMatchesOrIsCommittee } from '../../../../../../utils/eventHelpers';
 import { fetchEventWithCommitteeMemberIdsAndNames } from '../../../../../../utils/dbHelpers';
 import { authOptions } from '../../../../auth/[...nextauth]';
 import { handleAPIRoute } from '../../../../../../utils/apiUtils';
@@ -35,7 +35,7 @@ export default async function handle(req: Request, res: Response) {
         return res.status(400).json({ message: 'This submission no longer exists; please refresh the page and try again.' });
       }
 
-      if (existingRecord.userId !== session.user.id) {
+      if (!userMatchesOrIsCommittee(session, existingRecord.userId, event)) {
         return res.status(401).json({ message: 'You do not have access to this submission.' });
       }
 

@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
-import { Event } from '@prisma/client';
+import { Event, User } from '@prisma/client';
 import { SubmissionWithCategories } from '../utils/models';
 import { useConfirmationPrompt } from '../utils/ConfirmationPrompt';
 import { Alert, Button } from './layout';
@@ -33,12 +33,13 @@ function createEmptySubmission(event: Event): SubmissionWithCategories {
 
 interface SubmissionEditTabProps {
   event: Event;
+  user: User;
   submissions: SubmissionWithCategories[];
   allowSubmissions: boolean;
   onChange: (submissions: SubmissionWithCategories[]) => void;
 }
 
-export const SubmissionEditTab: React.FC<SubmissionEditTabProps> = ({ event, submissions, allowSubmissions, onChange }) => {
+export const SubmissionEditTab: React.FC<SubmissionEditTabProps> = ({ event, user, submissions, allowSubmissions, onChange }) => {
   const [activeSubmission, setActiveSubmission] = useState<SubmissionWithCategories | null>(null);
 
   const handleNewSubmission = useCallback(() => {
@@ -117,6 +118,7 @@ export const SubmissionEditTab: React.FC<SubmissionEditTabProps> = ({ event, sub
         <EditorColumn>
           <SubmissionEditor
             event={event}
+            user={user}
             submission={activeSubmission}
             onSave={handleSubmissionSave}
             onDelete={handleSubmissionDelete}

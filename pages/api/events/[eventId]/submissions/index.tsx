@@ -1,17 +1,29 @@
 import { Request, Response } from 'express';
+// eslint-disable-next-line camelcase
+import { unstable_getServerSession } from 'next-auth';
 import { prisma } from '../../../../../utils/db';
-import { areSubmissionsOpen } from '../../../../../utils/eventHelpers';
-import { fetchUserWithVettingInfo } from '../../../../../utils/dbHelpers';
+import { areSubmissionsOpen, isCommitteeOrAdmin, userMatchesOrIsCommittee } from '../../../../../utils/eventHelpers';
+import { fetchEventWithCommitteeMemberIdsAndNames } from '../../../../../utils/dbHelpers';
 import { ValidationSchemas } from '../../../../../utils/validation';
 import { handleAPIRoute } from '../../../../../utils/apiUtils';
 import { pluralizeWithValue } from '../../../../../utils/humanize';
+import { authOptions } from '../../../auth/[...nextauth]';
 
 export default async function handle(req: Request, res: Response) {
   await handleAPIRoute(req, res, {
     POST: async () => {
-      const user = await fetchUserWithVettingInfo(req, res);
+      const session = await unstable_getServerSession(req, res, authOptions);
 
-      if (!user) return res.status(401).json({ message: 'You must be logged in.' });
+      if (!session) return res.status(401).json({ message: 'You must be logged in.' });
+
+      const user = await prisma.user.findFirst({
+        where: { id: req.body.userId as string },
+        include: {
+          vettingInfo: true,
+        },
+      });
+
+      if (!user) return res.status(401).json({ message: 'User does not exist.' });
 
       if (!user?.vettingInfo) {
         return res.status(401).json({ message: 'You cannot submit to an event until you have filled out the runner info form.' });
@@ -19,13 +31,17 @@ export default async function handle(req: Request, res: Response) {
       
       let existingCategoryIds: string[] = [];
 
-      const event = await prisma.event.findFirst({
-        where: { id: req.query.eventId as string },
-      });
+      const event = await fetchEventWithCommitteeMemberIdsAndNames(req.query.eventId as string);
 
       if (!event) return res.status(400).json({ message: 'This event does not exist.' });
 
-      if (!areSubmissionsOpen(event)) return res.status(400).json({ message: 'Submissions are not open for this event.' });
+      if (!userMatchesOrIsCommittee(session, user.id, event)) {
+        return res.status(401).json({ message: 'Permission denied.' });
+      }
+
+      if (!areSubmissionsOpen(event) && !isCommitteeOrAdmin(event, session.user)) {
+        return res.status(400).json({ message: 'Submissions are not open for this event.' });
+      }
  
       if (req.body.id) {
         // Get existing record and ensure that it belongs to this user.
@@ -40,7 +56,9 @@ export default async function handle(req: Request, res: Response) {
           return res.status(400).json({ message: 'This submission no longer exists; please refresh the page and try again.' });
         }
 
-        if (existingRecord.userId !== user.id) return res.status(401).json({ message: 'You do not have access to this submission.' });
+        if (!userMatchesOrIsCommittee(session, existingRecord.id, event)) {
+          return res.status(401).json({ message: 'You do not have access to this submission.' });
+        }
 
         existingCategoryIds = existingRecord.categories.map(item => item.id);
       } else {

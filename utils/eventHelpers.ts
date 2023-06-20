@@ -1,5 +1,6 @@
 import { Event, User } from '@prisma/client';
 import { isAfter, isBefore, parseISO } from 'date-fns';
+import { Session } from 'next-auth';
 import { EventWithCommitteeMemberIdsAndNames } from './models';
 
 export function forceAsDate(value: string | Date): Date {
@@ -47,8 +48,16 @@ export function isMemberOfCommittee(event: EventWithCommitteeMemberIdsAndNames, 
   return event.committeeMembers.some(member => member.id === user.id);
 }
 
+export function isCommitteeOrAdmin(event: EventWithCommitteeMemberIdsAndNames, user: User): boolean {
+  return user.isAdmin || isMemberOfCommittee(event, user);
+}
+
 export function canUserViewEvent(event: EventWithCommitteeMemberIdsAndNames, user: User | null): boolean {
   if (event.visible) return true;
   
   return user ? (user.isAdmin || event.committeeMembers.some(member => member.id === user.id)) : false;
+}
+
+export function userMatchesOrIsCommittee(session: Session, userId: string, event: EventWithCommitteeMemberIdsAndNames) {
+  return userId === session.user.id || isCommitteeOrAdmin(event, session.user);
 }

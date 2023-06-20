@@ -1,4 +1,4 @@
-import { Event, GameSubmissionCategory, RunStatus } from '@prisma/client';
+import { Event, GameSubmissionCategory, RunStatus, User } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
@@ -11,12 +11,13 @@ import { Button, FormItem, Label, TextInput, Alert, TextAreaInput, SelectInput, 
 
 interface SubmissionEditorProps {
   event: Event,
+  user: User
   submission: SubmissionWithCategories;
   onSave: (value: SubmissionWithCategories) => void;
   onDelete: (id: string) => void;
 }
 
-export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: eventRecord, submission, onSave, onDelete }) => {
+export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: eventRecord, user, submission, onSave, onDelete }) => {
   const session = useSession();
   const [validatedSubmission, setSubmissionField] = useValidatedState(submission, ValidationSchemas.GameSubmission);
 
@@ -97,10 +98,13 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
   const [save, isSaving, saveError] = useSaveable<SubmissionWithCategories, SubmissionWithCategories>(`/api/events/${eventRecord.id}/submissions`, !validatedSubmission.error, POST_SAVE_OPTS);
   
   const handleSave = useCallback(async () => {
-    const response = await save(validatedSubmission.value);
+    const response = await save({
+      ...validatedSubmission.value,
+      userId: user.id,
+    });
 
     if (response) onSave(response);
-  }, [save, validatedSubmission.value, onSave]);
+  }, [save, validatedSubmission.value, user.id, onSave]);
 
   const remainingCategories = eventRecord.maxSubmissions - validatedSubmission.value.categories.length;
 

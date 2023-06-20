@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { Event, GameSubmission } from '@prisma/client';
+import { Event, GameSubmission, User } from '@prisma/client';
 import Select from 'react-select';
 import { IncentiveWithCategories, IncentiveWithCategoryIds, SubmissionWithCategories } from '../utils/models';
 import { useConfirmationPrompt } from '../utils/ConfirmationPrompt';
@@ -35,13 +35,14 @@ function createEmptyIncentive(gameSubmission: GameSubmission): IncentiveWithCate
 
 interface IncentiveEditTabProps {
   event: Event;
+  user: User;
   submissions: SubmissionWithCategories[];
   incentives: IncentiveWithCategories[];
   allowIncentives: boolean;
   onChange: (submissions: IncentiveWithCategories[]) => void;
 }
 
-export const IncentiveEditTab: React.FC<IncentiveEditTabProps> = ({ event, submissions, incentives: allIncentives, allowIncentives, onChange }) => {
+export const IncentiveEditTab: React.FC<IncentiveEditTabProps> = ({ event, user, submissions, incentives: allIncentives, allowIncentives, onChange }) => {
   const [activeIncentive, setActiveIncentive] = useState<IncentiveWithCategoryIds | null>(null);
   const [selectedSubmission, setSelectedSubmission] = useState<SubmissionWithCategories | null>(submissions[0] || null);
   const [activeParentSubmission, setActiveParentSubmission] = useState<SubmissionWithCategories>(submissions[0]);
@@ -153,6 +154,7 @@ export const IncentiveEditTab: React.FC<IncentiveEditTabProps> = ({ event, submi
           <IncentiveEditor
             submission={activeParentSubmission}
             incentive={activeIncentive}
+            user={user}
             onSave={handleIncentiveSave}
             onDelete={handleIncentiveDelete}
           />

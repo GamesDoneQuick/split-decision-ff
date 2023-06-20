@@ -124,14 +124,14 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incenti
                   <tbody>
                     {incentives.map(incentive => (
                       <tr key={incentive.id}>
-                        <td width="15%">
+                        <td width="20%">
                           {incentive.videoURL ? (
                             <VideoLink href={incentive.videoURL} target="_blank" rel="noopener noreferrer">
                               {incentive.name}
                             </VideoLink>
                           ) : incentive.name}
                         </td>
-                        <td width="10%">{incentive.estimate}</td>
+                        <td width="12%">{incentive.estimate}</td>
                         <td width="20%">{incentive.closeTime}</td>
                         <td>
                           {incentive.description}

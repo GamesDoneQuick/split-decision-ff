@@ -2,8 +2,7 @@ import { Request, Response } from 'express';
 // eslint-disable-next-line camelcase
 import { unstable_getServerSession } from 'next-auth';
 import { prisma } from '../../../../../utils/db';
-import { areIncentivesOpen } from '../../../../../utils/eventHelpers';
-import { fetchUserWithVettingInfo } from '../../../../../utils/dbHelpers';
+import { areIncentivesOpen, isCommitteeOrAdmin, userMatchesOrIsCommittee } from '../../../../../utils/eventHelpers';
 import { ValidationSchemas } from '../../../../../utils/validation';
 import { authOptions } from '../../../auth/[...nextauth]';
 import { handleAPIRoute } from '../../../../../utils/apiUtils';
@@ -15,24 +14,33 @@ export default async function handle(req: Request, res: Response) {
 
       if (!session) return res.status(401).json({ message: 'You must be logged in.' });
 
-      const user = await fetchUserWithVettingInfo(req, res);
+      const user = await prisma.user.findFirst({
+        where: { id: req.body.userId as string },
+        include: {
+          vettingInfo: true,
+        },
+      });
 
       if (!user?.vettingInfo) return res.status(401).json({ message: 'You cannot submit to an event until you have filled out the runner info form.' });
       
       const submission = await prisma.gameSubmission.findFirst({
         where: { id: req.body.gameSubmissionId as string },
         include: {
-          event: true,
+          event: {
+            include: {
+              committeeMembers: true,
+            },
+          },
         },
       });
 
       if (!submission) return res.status(400).json({ message: 'This submission does not exist.' });
 
-      if (submission.userId !== session.user.id) {
-        return res.status(401).json({ message: 'You do not have access to this incentive.' });
+      if (!userMatchesOrIsCommittee(session, user.id, submission.event)) {
+        return res.status(401).json({ message: 'Permission denied.' });
       }
 
-      if (!areIncentivesOpen(submission.event)) {
+      if (!areIncentivesOpen(submission.event) && !isCommitteeOrAdmin(submission.event, session.user)) {
         return res.status(400).json({ message: 'Incentive submissions are not open for this event.' });
       }
  
@@ -49,7 +57,7 @@ export default async function handle(req: Request, res: Response) {
           return res.status(400).json({ message: 'This incentive no longer exists; please refresh the page and try again.' });
         }
 
-        if (existingRecord.gameSubmission.userId !== session.user.id) {
+        if (!userMatchesOrIsCommittee(session, existingRecord.gameSubmission.userId, submission.event)) {
           return res.status(401).json({ message: 'You do not have access to this incentive.' });
         }
       } else {
