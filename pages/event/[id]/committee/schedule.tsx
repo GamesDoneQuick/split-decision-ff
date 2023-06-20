@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import type { NextPage, NextPageContext } from 'next';
 import { Event, RunStatus, ScheduledRun } from '@prisma/client';
-import { add, differenceInSeconds, isAfter, isBefore, set } from 'date-fns';
+import { add, differenceInSeconds, isAfter, isBefore, set, startOfDay } from 'date-fns';
 import { EventWithCommitteeMemberIdsAndNames, fetchServerSession, prepareAllRecordsForTransfer, SchedulableCategory } from '../../../../utils/models';
 import { fetchEventWithCommitteeMemberIdsAndNames } from '../../../../utils/dbHelpers';
 import { isMemberOfCommittee } from '../../../../utils/eventHelpers';
@@ -164,7 +164,7 @@ const Scheduler: NextPage<SchedulerProps> = ({ event, categories, scheduledRuns 
   const [isRunSetupTimeValid, setIsRunSetupTimeValid] = useState(true);
   const [isInterstitialLengthValid, setIsInterstitialLengthValid] = useState(true);
 
-  const startDate = useMemo(() => new Date(event.eventStart), [event.eventStart]);
+  const startDate = useMemo(() => add(startOfDay(new Date(event.eventStart)), { hours: event.startTime }), [event.eventStart, event.startTime]);
   const endDate = useMemo(() => add(new Date(event.eventStart), { days: event.eventDays }), [event.eventStart, event.eventDays]);
   
   const unslottedRuns = useMemo(() => {
