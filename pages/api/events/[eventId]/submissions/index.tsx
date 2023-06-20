@@ -129,6 +129,10 @@ export default async function handle(req: Request, res: Response) {
         },
       });
 
+      if (session.user.id !== user.id) {
+        console.info(`Committee member ${session.user.name} (${session.user.id}) edited the submissions of ${user.name} (${user.id}).`);
+      }
+
       return res.status(200).json(result);
     },
   });
