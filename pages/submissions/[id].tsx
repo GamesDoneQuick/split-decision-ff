@@ -83,6 +83,16 @@ export async function getServerSideProps(context: NextPageContext) {
 
   const submissionData = await fetchEventSubmissionDataForUser(event, user);
 
+  if (submissionData) {
+    submissionData.submissions = submissionData.submissions.map(submission => ({
+      ...submission,
+      categories: submission.categories.map(category => ({
+        ...category,
+        runStatus: 'Pending',
+      })),
+    }));
+  }
+
   return {
     props: submissionData,
   };
