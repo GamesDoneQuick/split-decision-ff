@@ -13,6 +13,8 @@ interface ExportedSubmissionRow {
   userName: string;
   pronouns: string;
   email: string;
+  twitterAccounts: string;
+  twitchAccounts: string;
   showPronouns: string;
   availability: string;
   runStatus: string;
@@ -35,6 +37,8 @@ const EXPORTED_SUBMISSION_FIELDS: [keyof ExportedSubmissionRow, string][] = [
   ['userName', 'Runner'],
   ['pronouns', 'Pronouns'],
   ['email', 'Email'],
+  ['twitterAccounts', 'Twitter Accounts'],
+  ['twitchAccounts', 'Twitch Account'],
   ['showPronouns', 'Show pronouns?'],
   ['availability', 'Availability'],
   ['runStatus', 'Status'],
@@ -94,7 +98,11 @@ export default async function handle(req: Request, res: Response) {
         },
         include: {
           categories: true,
-          user: true,
+          user: {
+            include: {
+              vettingInfo: true,
+            },
+          },
         },
       });
 
@@ -129,6 +137,8 @@ export default async function handle(req: Request, res: Response) {
           userName: username,
           pronouns: submission.user.pronouns,
           email: submission.user.email,
+          twitterAccounts: submission.user.vettingInfo?.twitterAccounts ?? '',
+          twitchAccounts: submission.user.vettingInfo?.twitchAccounts ?? '',
           showPronouns: submission.user.showPronouns,
           availability: availabilityString,
           gameTitle: submission.gameTitle,
