@@ -5,7 +5,6 @@ import { SessionProvider, signIn, useSession } from 'next-auth/react';
 import type { AppProps } from 'next/app';
 import Link from 'next/link';
 import { DefaultSeo } from 'next-seo';
-import { useRouter } from 'next/router';
 import { Button, GlobalStyle } from '../components/layout';
 import { SiteConfig } from '../utils/siteConfig';
 
@@ -33,8 +32,6 @@ const HeaderActions: React.FC = () => {
 };
 
 function SubmissionsApp({ Component, pageProps }: AppProps) {
-  const router = useRouter();
-
   return (
     <SessionProvider session={(pageProps as any).session}>
       <Container>
@@ -64,14 +61,12 @@ function SubmissionsApp({ Component, pageProps }: AppProps) {
             cardType: 'summary_large_image',
           }}
         />
-        {router && router.route !== '/landing' && (
-          <Header>
-            <Link href="/">
-              <a>{SiteConfig.siteName || 'Submissions'}</a>
-            </Link>
-            <HeaderActions />
-          </Header>
-        )}
+        <Header>
+          <Link href="/">
+            <a>{SiteConfig.siteName || 'Submissions'}</a>
+          </Link>
+          <HeaderActions />
+        </Header>
         <PageContent>
           <Component {...pageProps} />
         </PageContent>
