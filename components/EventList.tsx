@@ -160,7 +160,7 @@ export const EventList: React.FC<EventListProps> = ({ events: propEvents, onClic
         </EventListSection>
       )}
 
-      {!isLoading && upcomingEvents.length > 0 && (
+      {!isLoading && pastEvents.length > 0 && (
         <EventListSection>
           <EventListTitle>Past events</EventListTitle>
           <EventListElement>
