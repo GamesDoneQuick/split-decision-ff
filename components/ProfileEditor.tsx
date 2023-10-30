@@ -3,7 +3,7 @@ import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { POST_SAVE_OPTS, useSaveable } from '../utils/hooks';
 import { useValidatedState, ValidationSchemas } from '../utils/validation';
-import { Button, FormItem, Label, TextInput, ToggleSwitch, Alert, StaticInput } from './layout';
+import { Button, FormItem, Label, TextInput, ToggleSwitch, Alert, StaticInput, HelpText } from './layout';
 
 const SAVE_OPTS = {
   ...POST_SAVE_OPTS,
@@ -83,6 +83,9 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({ user }) => {
           maxLength={100}
           onChange={handleUpdateDisplayName}
         />
+        <HelpText>
+          If any of your runs are accepted, this is the name that will display on stream.
+        </HelpText>
       </FormItem>
       <FormItem>
         <Label htmlFor="email">Email</Label>

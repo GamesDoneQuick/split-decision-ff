@@ -216,7 +216,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({ event: eventRecor
             isCommitteeMember={isCommitteeMember}
           />
         </GameDetails>
-        <GameDetails>
+        {/* <GameDetails>
           <GameDetailsKey>Subgenre</GameDetailsKey>
           <GenreSelector
             field="secondaryGenre"
@@ -224,7 +224,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({ event: eventRecor
             submission={submission}
             isCommitteeMember={isCommitteeMember}
           />
-        </GameDetails>
+        </GameDetails> */}
         <GameDetails>
           <GameDetailsKey>Platform</GameDetailsKey>
           <div>{submission.platform}</div>

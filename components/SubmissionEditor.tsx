@@ -163,7 +163,7 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
           ))}
         </SelectInput>
       </FormItem>
-      <FormItem>
+      {/* <FormItem>
         <Label htmlFor="secondaryGenre">Subgenre (optional)</Label>
         <SelectInput
           id="secondaryGenre"
@@ -178,7 +178,7 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
             <option key={option} value={option}>{option}</option>
           ))}
         </SelectInput>
-      </FormItem>
+      </FormItem> */}
       <FormItem>
         <ToggleSwitch
           toggled={validatedSubmission.value.flashingLights}
