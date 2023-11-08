@@ -226,6 +226,7 @@ const SubmissionTime = styled.div`
 const EventStartDate = styled.div`
   font-weight: 700;
   margin-top: 0.5rem;
+  text-align: right;
 `;
 
 const EventListSection = styled.div`
