@@ -41,9 +41,9 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
     setSubmissionField('primaryGenre', event.target.value);
   }, [setSubmissionField]);
 
-  const handleUpdateSecondaryGenre = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSubmissionField('secondaryGenre', event.target.value);
-  }, [setSubmissionField]);
+  // const handleUpdateSecondaryGenre = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
+  //   setSubmissionField('secondaryGenre', event.target.value);
+  // }, [setSubmissionField]);
 
   const handleUpdateDescription = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setSubmissionField('description', event.target.value);
@@ -81,6 +81,7 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
         videoURL: '',
         estimate: '',
         description: '',
+        isCoop: false,
         runStatus: RunStatus.Pending,
         gameSubmissionId: submission?.id ?? '',
         isCommitteeVoteOpened: false,
@@ -222,7 +223,7 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
           helpText={`Technical notes are not shown on the public submission list, and are only used by the ${SiteConfig.organizationName} production team.`}
         />
       </FormItem>
-      <Separator />
+      {/* <Separator />
       <Instructions>Commentary</Instructions>
       <CommentaryInstructions>
         <p>
@@ -252,7 +253,7 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
           <option value="false">Community Commentator</option>
           <option value="true">Solo Commentary</option>
         </SelectInput>
-      </FormItem>
+      </FormItem> */}
       <CategoryList>
         <Instructions>Categories ({validatedSubmission.value.categories.length})</Instructions>
         {validatedSubmission.value.categories.map((category, index) => (

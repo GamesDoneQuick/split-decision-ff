@@ -89,6 +89,7 @@ export default async function handle(req: Request, res: Response) {
           videoURL: category.videoURL,
           estimate: category.estimate,
           description: category.description,
+          isCoop: category.isCoop,
         })),
         soloCommentary: req.body.soloCommentary,
       };

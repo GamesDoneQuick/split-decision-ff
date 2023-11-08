@@ -31,9 +31,10 @@ const Home: NextPage = () => {
         </WelcomeMessage>
         <WelcomeDetails>
           You must be a member of the {SiteConfig.organizationName} community to submit to our events.
-          You can send a DM to&nbsp;
-          <a href="https://twitter.com/framefatales" target="_blank" rel="noopener noreferrer">@FrameFatales on Twitter</a>
-          <span>&nbsp;or email&nbsp;</span><a href="mailto:framefatales@gamesdonequick.com">framefatales@gamesdonequick.com</a> to join.
+          You can DM us on&nbsp;
+          <a href="https://twitter.com/framefatales" target="_blank" rel="noopener noreferrer">Twitter</a> or&nbsp;
+          <a href="https://instagram.com/gamesdonequick" target="_blank" rel="noopener noreferrer">Instagram</a>, or email<span> </span>
+          <a href="mailto:framefatales@gamesdonequick.com">framefatales@gamesdonequick.com</a> to join.
         </WelcomeDetails>
       </LoginColumn>
     </Container>

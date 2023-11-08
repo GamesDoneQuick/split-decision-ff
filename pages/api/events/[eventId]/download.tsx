@@ -31,6 +31,7 @@ interface ExportedSubmissionRow {
   url: string;
   estimate: string;
   categoryDescription: string;
+  isCoop: string;
 }
 
 const EXPORTED_SUBMISSION_FIELDS: [keyof ExportedSubmissionRow, string][] = [
@@ -55,6 +56,7 @@ const EXPORTED_SUBMISSION_FIELDS: [keyof ExportedSubmissionRow, string][] = [
   ['url', 'URL'],
   ['estimate', 'Estimate'],
   ['categoryDescription', 'Category Description'],
+  ['isCoop', 'Race/Co-op'],
 ];
 
 const NO_HOURS_TIMESTAMP_REGEX = /^(?:([0-5]\d):)?([0-5]\d)$/;
@@ -160,6 +162,7 @@ export default async function handle(req: Request, res: Response) {
           url: category.videoURL,
           estimate: normalizeEstimate(category.estimate),
           categoryDescription: category.description,
+          isCoop: category.isCoop.toString(),
         }));
       });
 

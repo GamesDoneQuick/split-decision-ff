@@ -149,6 +149,7 @@ model GameSubmissionCategory {
   videoURL           String
   estimate           String
   description        String
+  isCoop             Boolean                  @default(false)
   isCommitteeVoteOpened Boolean               @default(false)
   runStatus          RunStatus                @default(Pending)
   gameSubmission     GameSubmission           @relation(fields: [gameSubmissionId], references: [id], onDelete: Cascade)

@@ -3,7 +3,10 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { SiteConfig } from '../utils/siteConfig';
 import { useValidatedState, ValidationSchemas } from '../utils/validation';
-import { Button, FormItem, Label, TextAreaInput, TextInput } from './layout';
+import { Alert, Button, FormItem, Label, TextAreaInput, TextInput, ToggleSwitch } from './layout';
+import { stringDurationToSeconds } from '../utils/durationHelpers';
+
+const LONG_RUN_WARNING_THRESHOLD_S = 3600 * 3.5;
 
 interface CategoryEditorProps {
   category: GameSubmissionCategory;
@@ -33,6 +36,12 @@ export const CategoryEditor: React.FC<CategoryEditorProps> = ({ category, onDele
   const handleUpdateDescription = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
     handleUpdate('description', event.target.value);
   }, [handleUpdate]);
+
+  const handleUpdateCoop = useCallback((value: boolean) => {
+    handleUpdate('isCoop', value);
+  }, [handleUpdate]);
+
+  const isRunLong = stringDurationToSeconds(validatedCategory.value.estimate) >= LONG_RUN_WARNING_THRESHOLD_S;
   
   return (
     <CategoryContainer>
@@ -69,6 +78,11 @@ export const CategoryEditor: React.FC<CategoryEditorProps> = ({ category, onDele
           onChange={handleUpdateEstimate}
         />
       </FormItem>
+      {isRunLong && (
+        <ConditionalAlert variant="warning">
+          Heads up! We are not a 24/7 event and longer runs may be difficult to accommodate.
+        </ConditionalAlert>
+      )}
       <FormItem>
         <Label htmlFor="description">Description</Label>
         <TextAreaInput
@@ -80,6 +94,19 @@ export const CategoryEditor: React.FC<CategoryEditorProps> = ({ category, onDele
           onChange={handleUpdateDescription}
         />
       </FormItem>
+      <FormItem>
+        <ToggleSwitch
+          toggled={validatedCategory.value.isCoop}
+          onChange={handleUpdateCoop}
+        >
+          This run is co-op or a race.
+        </ToggleSwitch>
+      </FormItem>
+      {validatedCategory.value.isCoop && (
+        <ConditionalAlert variant="warning">
+          Both runners must submit this category or else the submission will not be considered.
+        </ConditionalAlert>
+      )}
       <DeleteCategoryButton variant="danger" onClick={onDelete}>Delete</DeleteCategoryButton>
     </CategoryContainer>
   );
@@ -101,4 +128,8 @@ const DeleteCategoryButton = styled(Button)`
   margin-left: auto;
   margin-top: 0.5rem;
   font-size: 1.25rem;
+`;
+
+const ConditionalAlert = styled(Alert)`
+  margin-top: 1rem;
 `;

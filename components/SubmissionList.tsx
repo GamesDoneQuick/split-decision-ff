@@ -99,6 +99,9 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incenti
       </td>
       <NumericCell width="10%">{category.estimate}</NumericCell>
       <DescriptionCell>
+        {isCommitteeMember && category.isCoop && (
+          <CoopBadge>Race/Co-op</CoopBadge>
+        )}
         {category.description}
 
         {isCommitteeMember && incentives.length > 0 && (
@@ -491,6 +494,13 @@ const SoloCommentaryBadge = styled(Badge)`
   background-color: ${SiteConfig.colors.status.backup};
   color: ${SiteConfig.colors.text.light};
   font-family: 'Lexend', sans-serif;
+`;
+
+const CoopBadge = styled(Badge)`
+  background-color: ${SiteConfig.colors.accents.activeTimeslot};
+  color: ${SiteConfig.colors.text.light};
+  font-family: 'Lexend', sans-serif;
+  margin: 0 0.5rem 0 0;
 `;
 
 const StatusBadge = styled(Badge)<{ status: RunStatus }>`

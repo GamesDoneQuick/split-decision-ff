@@ -73,7 +73,8 @@ export default async function handle(req: Request, res: Response) {
           { name: 'Runner(s)', value: getUserName(category.gameSubmission.user) ?? '<missing username>', inline: true },
           { name: 'Category', value: category.categoryName, inline: true },
           { name: 'Duration', value: category.estimate, inline: true },
-          { name: 'Solo Commentary', value: category.gameSubmission.soloCommentary ? 'Yes' : 'No', inline: true },
+          // { name: 'Solo Commentary', value: category.gameSubmission.soloCommentary ? 'Yes' : 'No', inline: true },
+          { name: 'Race/Co-op', value: category.isCoop ? 'Yes' : 'No', inline: true },
         );
     
       const message = await matchingThread.send({ embeds: [embed] });
