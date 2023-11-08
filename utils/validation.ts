@@ -74,6 +74,12 @@ export const ValidationSchemas = {
     twitchAccounts: Joi.string().max(1000).messages({
       'string.empty': 'You must provide your Twitch accounts or write "none".',
     }),
+    instagramAccounts: Joi.string().max(1000).messages({
+      'string.empty': 'You must provide your Instagram accounts or write "none".',
+    }),
+    tiktokAccounts: Joi.string().max(1000).messages({
+      'string.empty': 'You must provide your TikTok accounts or write "none".',
+    }),
   }).unknown(true),
   Event: Joi.object<EventWithStringDates<EventWithCommitteeMemberIdsAndNames>>({
     eventName: Joi.string().required().messages({ 'string.empty': 'Event name is required.' }),

@@ -17,6 +17,12 @@ const RUN_STATUS_OPTIONS = [
   RunStatus.Coop,
 ];
 
+function formatRunStatus(status: RunStatus) {
+  if (status === RunStatus.Coop) return 'Co-op/Race';
+
+  return status;
+}
+
 type SubmissionRecord = SubmissionWithCategories | SubmissionWithCategoriesAndUsername | CommitteeVisibleSubmission;
 
 interface GenreSelectorProps {
@@ -93,7 +99,7 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incenti
         </VideoLink>
         <div>
           {runStatus !== 'Pending' && (
-            <StatusBadge status={runStatus}>{runStatus}</StatusBadge>
+            <StatusBadge status={runStatus}>{formatRunStatus(runStatus)}</StatusBadge>
           )}
         </div>
       </td>
@@ -162,7 +168,7 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incenti
           <td width="10%">
             <StatusSelector disabled={isSaving} value={runStatus} onChange={handleChangeStatus}>
               {RUN_STATUS_OPTIONS.map(option => (
-                <option key={option} value={option}>{option}</option>
+                <option key={option} value={option}>{option === RunStatus.Coop ? 'Co-op/Race' : option}</option>
               ))}
             </StatusSelector>
             {saveError.error && (

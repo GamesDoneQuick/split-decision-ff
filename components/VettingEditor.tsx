@@ -15,6 +15,8 @@ function createEmptyVettingInfo(): VettingInfo {
     userId: '',
     twitterAccounts: '',
     twitchAccounts: '',
+    instagramAccounts: '',
+    tiktokAccounts: '',
     createdAt: null,
     updatedAt: null,
   };
@@ -38,6 +40,14 @@ export const VettingEditor: React.FC<VettingEditorProps> = ({ user }) => {
 
   const handleUpdateTwitchAccounts = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setVettingInfoField('twitchAccounts', event.target.value);
+  }, [setVettingInfoField]);
+
+  const handleUpdateInstagramAccounts = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setVettingInfoField('instagramAccounts', event.target.value);
+  }, [setVettingInfoField]);
+
+  const handleUpdateTiktokAccounts = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setVettingInfoField('tiktokAccounts', event.target.value);
   }, [setVettingInfoField]);
 
   const [save, isSaving, saveError] = useSaveable<VettingInfo, VettingInfo>('/api/user/vetting', !validatedVettingInfo.error, POST_SAVE_OPTS);
@@ -77,6 +87,28 @@ export const VettingEditor: React.FC<VettingEditorProps> = ({ user }) => {
           onChange={handleUpdateTwitchAccounts}
         />
         <HelpText>List all Twitch accounts associated with you, separated by commas. If you have none, write &ldquo;none&rdquo;.</HelpText>
+      </FormItem>
+      <FormItem>
+        <Label htmlFor="instagramAccounts">Instagram Account(s)</Label>
+        <TextInput
+          id="instagramAccounts"
+          type="text"
+          value={validatedVettingInfo.value.instagramAccounts}
+          error={validatedVettingInfo.error?.instagramAccounts}
+          onChange={handleUpdateInstagramAccounts}
+        />
+        <HelpText>List all Instagram accounts associated with you, separated by commas. If you have none, write &ldquo;none&rdquo;.</HelpText>
+      </FormItem>
+      <FormItem>
+        <Label htmlFor="tiktokAccounts">TikTok Account(s)</Label>
+        <TextInput
+          id="tiktokAccounts"
+          type="text"
+          value={validatedVettingInfo.value.tiktokAccounts}
+          error={validatedVettingInfo.error?.tiktokAccounts}
+          onChange={handleUpdateTiktokAccounts}
+        />
+        <HelpText>List all TikTok accounts associated with you, separated by commas. If you have none, write &ldquo;none&rdquo;.</HelpText>
       </FormItem>
       
       <FormItemWithDivider>

@@ -71,6 +71,8 @@ model VettingInfo {
   userId          String
   twitterAccounts String
   twitchAccounts  String
+  instagramAccounts String  @default("None")
+  tiktokAccounts  String    @default("None")
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt       DateTime? @default(now())
   updatedAt       DateTime? @updatedAt

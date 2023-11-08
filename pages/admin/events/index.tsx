@@ -109,7 +109,7 @@ const EventDetails: NextPage<EventDetailsProps> = ({ events: eventsFromServer })
       <ColumnContainer>
         <EventColumn>
           <Button onClick={handleNewEvent}>Create Event</Button>
-          <EventList events={events} onClick={handleSetActiveEvent} includeHidden />
+          <EventList title="Edit events" events={events} onClick={handleSetActiveEvent} includeHidden />
         </EventColumn>
         <EditorColumn>
           {activeEvent && (

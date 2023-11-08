@@ -73,11 +73,12 @@ const EventItem: React.FC<EventItemProps> = ({ event, onClick }) => {
 
 interface EventListProps {
   events?: Event[];
+  title?: string;
   includeHidden?: boolean;
   onClick: (id: string) => void;
 }
 
-export const EventList: React.FC<EventListProps> = ({ events: propEvents, onClick, includeHidden = false }) => {
+export const EventList: React.FC<EventListProps> = ({ events: propEvents, title, onClick, includeHidden = false }) => {
   const [hasFetchedEvents, setHasFetchedEvents] = useState(!!propEvents);
   const [isLoading, setIsLoading] = useState(!propEvents);
   const [events, setEvents] = useState<Event[]>(propEvents ?? []);
@@ -126,7 +127,7 @@ export const EventList: React.FC<EventListProps> = ({ events: propEvents, onClic
 
   return (
     <Container>
-      <Title>Events</Title>
+      <Title>{title || 'Events'}</Title>
       {isLoading && <div>Loading events...</div>}
 
       {!isLoading && !!error && (

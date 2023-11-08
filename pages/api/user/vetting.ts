@@ -15,6 +15,8 @@ export default async function handle(req: Request, res: Response) {
       const editableData = {
         twitterAccounts: req.body.twitterAccounts,
         twitchAccounts: req.body.twitchAccounts,
+        instagramAccounts: req.body.instagramAccounts,
+        tiktokAccounts: req.body.tiktokAccounts,
       };
 
       await prisma.vettingInfo.upsert({

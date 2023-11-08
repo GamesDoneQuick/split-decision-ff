@@ -65,7 +65,7 @@ const SubmissionsHome: NextPage<SubmissionsHomeProps> = ({ user }) => {
         </ProfileColumn>
         <SubmissionsColumn>
           {!user.vettingInfo && <VettingInfoAlert user={user} />}
-          {user.vettingInfo && <EventList onClick={navigateToEvent} />}
+          {user.vettingInfo && <EventList title="Submit to events" onClick={navigateToEvent} />}
         </SubmissionsColumn>
       </ColumnContainer>
     </Container>
