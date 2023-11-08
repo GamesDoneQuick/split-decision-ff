@@ -61,9 +61,9 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
     setSubmissionField('flashingLights', value);
   }, [setSubmissionField]);
 
-  const handleUpdateSoloCommentary = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSubmissionField('soloCommentary', event.target.value === 'true');
-  }, [setSubmissionField]);
+  // const handleUpdateSoloCommentary = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
+  //   setSubmissionField('soloCommentary', event.target.value === 'true');
+  // }, [setSubmissionField]);
 
   const handleCategoryUpdate = useCallback((value: GameSubmissionCategory, index: number) => {
     setSubmissionField('categories', validatedSubmission.value.categories.reduce<GameSubmissionCategory[]>((acc, category, idx) => [
@@ -314,22 +314,22 @@ const DeleteSubmissionButton = styled(Button)`
   margin: 0;
 `;
 
-const Separator = styled.div`
-  display: block; 
-  width: 100%;
-  height: 1px;
-  background-color: ${SiteConfig.colors.secondary};
-  margin: 0.5rem 0;
-`;
+// const Separator = styled.div`
+//   display: block;
+//   width: 100%;
+//   height: 1px;
+//   background-color: ${SiteConfig.colors.secondary};
+//   margin: 0.5rem 0;
+// `;
 
-const CommentaryInstructions = styled.p`
-  line-height: 1.2;
-  font-size: 1rem;
-  margin-top: 0;
-`;
+// const CommentaryInstructions = styled.p`
+//   line-height: 1.2;
+//   font-size: 1rem;
+//   margin-top: 0;
+// `;
 
-const CommentaryTypeLabel = styled.h4`
-  font-weight: 700;
-  margin: 0 0 0.125rem;
-  font-size: 1.125rem;
-`;
+// const CommentaryTypeLabel = styled.h4`
+//   font-weight: 700;
+//   margin: 0 0 0.125rem;
+//   font-size: 1.125rem;
+// `;
