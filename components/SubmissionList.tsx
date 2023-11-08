@@ -106,7 +106,7 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incenti
       <NumericCell width="10%">{category.estimate}</NumericCell>
       <DescriptionCell>
         {isCommitteeMember && category.isCoop && (
-          <CoopBadge>Race/Co-op</CoopBadge>
+          <CoopBadge>Co-op/Race</CoopBadge>
         )}
         {category.description}
 

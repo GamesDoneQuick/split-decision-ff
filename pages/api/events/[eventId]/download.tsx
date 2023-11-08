@@ -60,7 +60,7 @@ const EXPORTED_SUBMISSION_FIELDS: [keyof ExportedSubmissionRow, string][] = [
   ['url', 'URL'],
   ['estimate', 'Estimate'],
   ['categoryDescription', 'Category Description'],
-  ['isCoop', 'Race/Co-op'],
+  ['isCoop', 'Co-op/Race'],
 ];
 
 const NO_HOURS_TIMESTAMP_REGEX = /^(?:([0-5]\d):)?([0-5]\d)$/;

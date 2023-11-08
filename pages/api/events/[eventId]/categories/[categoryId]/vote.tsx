@@ -74,7 +74,7 @@ export default async function handle(req: Request, res: Response) {
           { name: 'Category', value: category.categoryName, inline: true },
           { name: 'Duration', value: category.estimate, inline: true },
           // { name: 'Solo Commentary', value: category.gameSubmission.soloCommentary ? 'Yes' : 'No', inline: true },
-          { name: 'Race/Co-op', value: category.isCoop ? 'Yes' : 'No', inline: true },
+          { name: 'Co-op/Race', value: category.isCoop ? 'Yes' : 'No', inline: true },
         );
     
       const message = await matchingThread.send({ embeds: [embed] });
