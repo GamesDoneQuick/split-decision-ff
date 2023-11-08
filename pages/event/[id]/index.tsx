@@ -5,7 +5,7 @@ import { NextSeo } from 'next-seo';
 import { useRouter } from 'next/router';
 import { normalizeText } from 'normalize-text';
 import Select from 'react-select';
-import { GameSubmissionCategory } from '@prisma/client';
+import { GameSubmissionCategory, RunStatus } from '@prisma/client';
 import { formatDuration, intervalToDuration } from 'date-fns';
 import { prisma } from '../../../utils/db';
 import { SubmissionList } from '../../../components/SubmissionList';
@@ -29,14 +29,17 @@ function sortAsGenericUser(a: SubmissionWithCategoriesAndUsername | CommitteeVis
   return a.gameTitle.localeCompare(b.gameTitle);
 }
 
+// These filters should really be further down the component chain but alas
 function getCategoryCount(list: CategoryContainingRecord) {
-  return list.reduce((acc, item) => acc + item.categories.length, 0);
+  return list.reduce((acc, item) => acc + item.categories.filter(category => category.runStatus !== 'Coop').length, 0);
 }
 
 function getTotalCategoryDuration(list: CategoryContainingRecord) {
-  return list.reduce((acc, item) => item.categories.reduce((innerAcc, category) => (
-    innerAcc + stringDurationToSeconds(category.estimate)
-  ), acc), 0);
+  return list.reduce((acc, item) => item.categories
+    .filter(category => category.runStatus !== 'Coop')
+    .reduce((innerAcc, category) => (
+      innerAcc + stringDurationToSeconds(category.estimate)
+    ), acc), 0);
 }
 interface EventDetailsProps {
   event: EventWithCommitteeMemberIdsAndNames;
@@ -44,8 +47,9 @@ interface EventDetailsProps {
   isCommitteeMember: boolean,
 }
 
-const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommitteeMember }) => {
+const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions: rawSubmissions, isCommitteeMember }) => {
   const router = useRouter();
+  const [submissions, setSubmissions] = useState(rawSubmissions);
   const [filterValue, setFilterValue] = useState((router.query.filter || '').toString());
   const [showPending, setShowPending] = useState(router.query.pending !== 'false');
   const [showDeclined, setShowDeclined] = useState(router.query.declined !== 'false');
@@ -176,6 +180,27 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
     });
   }, [router]);
 
+  const handleStatusChange = useCallback((submissionId: string, categoryId: string, status: RunStatus) => {
+    const updatedSubmissions = (submissions as SubmissionWithCategoriesAndUsername[]).reduce((acc, submission) => {
+      if (submission.id === submissionId) {
+        return [...acc, {
+          ...submission,
+          categories: submission.categories.reduce((subAcc, category) => {
+            if (category.id === categoryId) {
+              return [...subAcc, { ...category, runStatus: status }];
+            }
+
+            return [...subAcc, category];
+          }, [] as GameSubmissionCategory[]),
+        }];
+      }
+
+      return [...acc, submission];
+    }, [] as SubmissionWithCategoriesAndUsername[]);
+
+    setSubmissions(updatedSubmissions);
+  }, [submissions]);
+
   const mappedSubcommitteeValue = useMemo(() => subcommitteeFilters.map(x => ({ value: x, label: x })), [subcommitteeFilters]);
 
   return (
@@ -266,7 +291,13 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions, isCommi
         </FilterContainer>
       </WelcomeMessageContainer>
       <SubmissionListContainer>
-        <SubmissionList event={event} submissions={filteredSubmissions} showUsernames isCommitteeMember={isCommitteeMember} />
+        <SubmissionList
+          event={event}
+          submissions={filteredSubmissions}
+          showUsernames
+          onStatusChange={handleStatusChange}
+          isCommitteeMember={isCommitteeMember}
+        />
       </SubmissionListContainer>
       <SubmissionTotal>
         Showing {filteredCategoryCount} of {pluralizeWithValue(allCategoryCount, 'category', 'categories')} ({filteredCategoryDuration})

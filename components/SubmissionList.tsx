@@ -68,10 +68,11 @@ interface CategoryRowProps {
   submission: GameSubmission,
   category: GameSubmissionCategory;
   incentives: IncentiveWithCategories[];
+  onStatusChange?: (submissionId: string, categoryId: string, status: RunStatus) => void;
   isCommitteeMember: boolean;
 }
 
-const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incentives, isCommitteeMember }) => {
+const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incentives, onStatusChange, isCommitteeMember }) => {
   const [showIncentives, setShowIncentives] = useState(false);
   const [hasOpenedCommitteeVote, setHasOpenedCommitteeVote] = useState(category.isCommitteeVoteOpened);
 
@@ -81,10 +82,14 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incenti
   const [save, isSaving, saveError] = useSaveable<{ status: string }, string>(`/api/events/${submission.eventId}/categories/${category.id}/status`, true, POST_SAVE_OPTS);
 
   const handleChangeStatus = useCallback(async (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setRunStatus(event.target.value as RunStatus);
+    const status = event.target.value as RunStatus;
 
-    await save({ status: event.target.value });
-  }, [save]);
+    setRunStatus(status);
+
+    await save({ status });
+
+    onStatusChange?.(submission.id, category.id, status);
+  }, [save, onStatusChange, submission.id, category.id]);
 
   const handleStartCommitteeVote = useCallback((categoryId: string) => {
     setHasOpenedCommitteeVote(true);
@@ -105,9 +110,6 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incenti
       </td>
       <NumericCell width="10%">{category.estimate}</NumericCell>
       <DescriptionCell>
-        {isCommitteeMember && category.isCoop && (
-          <CoopBadge>Co-op/Race</CoopBadge>
-        )}
         {category.description}
 
         {isCommitteeMember && incentives.length > 0 && (
@@ -190,10 +192,11 @@ const CategoryRow: React.FC<CategoryRowProps> = ({ submission, category, incenti
 interface SubmissionDetailsProps {
   event: Event;
   submission: SubmissionRecord;
+  onStatusChange?: (submissionId: string, categoryId: string, status: RunStatus) => void;
   isCommitteeMember: boolean;
 }
 
-const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({ event: eventRecord, submission, isCommitteeMember = false }) => {
+const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({ event: eventRecord, submission, onStatusChange, isCommitteeMember = false }) => {
   const incentivesPerCategory = useMemo(() => {
     if (!isCommitteeMember || !('incentives' in submission)) return {};
 
@@ -278,6 +281,7 @@ const SubmissionDetails: React.FC<SubmissionDetailsProps> = ({ event: eventRecor
                 submission={submission}
                 category={category}
                 incentives={incentivesPerCategory[category.id] || []}
+                onStatusChange={onStatusChange}
                 isCommitteeMember={isCommitteeMember}
               />
             ))}
@@ -296,11 +300,12 @@ interface SubmissionUserData {
 interface SubmissionListProps {
   event: Event;
   submissions: SubmissionRecord[];
+  onStatusChange?: (submissionId: string, categoryId: string, status: RunStatus) => void;
   showUsernames?: boolean;
   isCommitteeMember?: boolean;
 }
 
-export const SubmissionList: React.FC<SubmissionListProps> = ({ event: eventRecord, submissions, showUsernames = false, isCommitteeMember = false }) => {
+export const SubmissionList: React.FC<SubmissionListProps> = ({ event: eventRecord, submissions, onStatusChange, showUsernames = false, isCommitteeMember = false }) => {
   const [groupedUsernames, groupedSubmissions] = useMemo(() => (
     submissions.reduce(([usernameMapping, submissionMapping], submission) => [
       {
@@ -334,6 +339,7 @@ export const SubmissionList: React.FC<SubmissionListProps> = ({ event: eventReco
               key={submission.id}
               event={eventRecord}
               submission={submission}
+              onStatusChange={onStatusChange}
               isCommitteeMember={isCommitteeMember}
             />
           ))}
@@ -502,12 +508,12 @@ const SoloCommentaryBadge = styled(Badge)`
   font-family: 'Lexend', sans-serif;
 `;
 
-const CoopBadge = styled(Badge)`
-  background-color: ${SiteConfig.colors.accents.activeTimeslot};
-  color: ${SiteConfig.colors.text.light};
-  font-family: 'Lexend', sans-serif;
-  margin: 0 0.5rem 0 0;
-`;
+// const CoopBadge = styled(Badge)`
+//   background-color: ${SiteConfig.colors.accents.activeTimeslot};
+//   color: ${SiteConfig.colors.text.light};
+//   font-family: 'Lexend', sans-serif;
+//   margin: 0 0.5rem 0 0;
+// `;
 
 const StatusBadge = styled(Badge)<{ status: RunStatus }>`
   display: block;
@@ -516,6 +522,7 @@ const StatusBadge = styled(Badge)<{ status: RunStatus }>`
   background-color: ${({ status }) => {
     switch (status) {
       case 'Accepted':
+      case 'Coop':
       case 'Bonus':
         return SiteConfig.colors.status.accepted;
 
