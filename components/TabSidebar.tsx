@@ -1,11 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
 import { SiteConfig } from '../utils/siteConfig';
-import { Button } from './layout';
+import { Button, WarningIcon } from './layout';
 
-interface TabOption {
+export interface TabOption {
   value: string;
   label: string;
+  showWarning?: boolean;
 }
 
 interface TabSidebarProps {
@@ -16,9 +17,9 @@ interface TabSidebarProps {
 
 export const TabSidebar: React.FC<TabSidebarProps> = ({ options, onChange, value: selectedValue }) => (
   <Container>
-    {options.map(({ value, label }) => (
+    {options.map(({ value, label, showWarning }) => (
       <Tab key={value} onClick={() => onChange(value)} isActive={selectedValue === value}>
-        {label}
+        {showWarning && <TabWarningIcon />} {label}
       </Tab>
     ))}
   </Container>
@@ -42,6 +43,7 @@ const Container = styled.div`
 `;
 
 const Tab = styled(Button)<{ isActive: boolean }>`
+  position: relative;
   background-color: ${({ isActive }) => isActive ? SiteConfig.colors.primary : 'transparent'};
   color: ${SiteConfig.colors.text.primary};
   border-radius: 0;
@@ -59,4 +61,11 @@ const Tab = styled(Button)<{ isActive: boolean }>`
   &&:active {
     background-color: ${({ isActive }) => isActive ? SiteConfig.colors.primary : 'rgba(255, 255, 255, 0.1)'};
   }
+`;
+
+const TabWarningIcon = styled(WarningIcon)`
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
 `;

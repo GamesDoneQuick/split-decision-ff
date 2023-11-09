@@ -9,19 +9,10 @@ import { zonedTimeToUtc, utcToZonedTime } from 'date-fns-tz';
 import { areIncentivesOpen, areSubmissionsOpen } from '../utils/eventHelpers';
 import { IncentiveWithCategories, SubmissionWithCategories, UserWithVettingInfo } from '../utils/models';
 import { SiteConfig } from '../utils/siteConfig';
-import { TabSidebar } from './TabSidebar';
+import { TabOption, TabSidebar } from './TabSidebar';
 import { SubmissionEditTab } from './SubmissionEditTab';
 import { IncentiveEditTab } from './IncentiveEditTab';
-
-const SUBMISSION_TABS_SUBMISSIONS_CLOSED = [
-  { value: 'submissions', label: 'Submissions' },
-  { value: 'incentives', label: 'Incentives' },
-];
-
-const SUBMISSION_TABS_SUBMISSIONS_OPEN = [
-  { value: 'availability', label: 'Availability' },
-  ...SUBMISSION_TABS_SUBMISSIONS_CLOSED,
-];
+import { Alert } from './layout';
 
 function renderSelectorTime(_time: Date): React.ReactNode {
   return <div />;
@@ -90,18 +81,37 @@ export const UserEventSubmissionView: NextPage<UserEventSubmissionViewProps> = (
   const allowSubmissions = useMemo(() => ignoreLockDate || (user.vettingInfo !== undefined && user.vettingInfo !== null && areSubmissionsOpen(event)), [ignoreLockDate, user.vettingInfo, event]);
   const allowIncentives = useMemo(() => ignoreLockDate || (user.vettingInfo !== undefined && user.vettingInfo !== null && areIncentivesOpen(event)), [ignoreLockDate, user.vettingInfo, event]);
 
-  const tabList = useMemo(() => (
-    allowSubmissions ? SUBMISSION_TABS_SUBMISSIONS_OPEN : SUBMISSION_TABS_SUBMISSIONS_CLOSED
-  ), [allowSubmissions]);
+  const tabList = useMemo(() => {
+    let tabs = [
+      { value: 'submissions', label: 'Submissions' },
+      { value: 'incentives', label: 'Incentives' },
+    ] as TabOption[];
+
+    if (allowSubmissions) {
+      tabs = [
+        { value: 'availability', label: 'Availability', showWarning: availability.slots.length === 0 },
+        ...tabs,
+      ];
+    }
+
+    return tabs;
+  }, [allowSubmissions, availability]);
 
   return (
     <MainContent>
-      <TabSidebar value={activeTab} options={tabList} onChange={setActiveTab} />
+      <TabSidebar
+        value={activeTab}
+        options={tabList}
+        onChange={setActiveTab}
+      />
       <ContentColumn>
         {allowSubmissions && activeTab === 'availability' && (
           <ScheduleSelectorContainer>
             <Title>Availability</Title>
             <p>All times are in <b>Eastern Standard Time</b>.</p>
+            {availability.slots.length === 0 && (
+              <Alert variant="warning">You have not selected any slots.</Alert>
+            )}
             <ScheduleSelector
               startDate={event.eventStart}
               minTime={event.startTime}

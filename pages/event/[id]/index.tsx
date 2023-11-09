@@ -7,6 +7,7 @@ import { normalizeText } from 'normalize-text';
 import Select from 'react-select';
 import { GameSubmissionCategory, RunStatus } from '@prisma/client';
 import { formatDuration, intervalToDuration } from 'date-fns';
+import { ParsedUrlQueryInput } from 'querystring';
 import { prisma } from '../../../utils/db';
 import { SubmissionList } from '../../../components/SubmissionList';
 import { CommitteeVisibleSubmission, EventWithCommitteeMemberIdsAndNames, fetchServerSession, prepareRecordForTransfer, SubmissionWithCategoriesAndUsername } from '../../../utils/models';
@@ -41,6 +42,10 @@ function getTotalCategoryDuration(list: CategoryContainingRecord) {
       innerAcc + stringDurationToSeconds(category.estimate)
     ), acc), 0);
 }
+
+const STATUS_FILTERS = ['accepted', 'backup', 'declined', 'pending'] as const;
+type StatusFilter = typeof STATUS_FILTERS[number];
+
 interface EventDetailsProps {
   event: EventWithCommitteeMemberIdsAndNames;
   submissions: SubmissionWithCategoriesAndUsername[] | CommitteeVisibleSubmission[];
@@ -51,10 +56,12 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions: rawSubm
   const router = useRouter();
   const [submissions, setSubmissions] = useState(rawSubmissions);
   const [filterValue, setFilterValue] = useState((router.query.filter || '').toString());
-  const [showPending, setShowPending] = useState(router.query.pending !== 'false');
-  const [showDeclined, setShowDeclined] = useState(router.query.declined !== 'false');
-  const [showBackup, setShowBackup] = useState(router.query.backup !== 'false');
-  const [showAccepted, setShowAccepted] = useState(router.query.accepted !== 'false');
+  const [visibleStatuses, setVisibleStatuses] = useState(() => STATUS_FILTERS.reduce((acc, filter) => {
+    if (router.query[filter] !== 'false') return [...acc, filter];
+
+    return acc;
+  }, [] as StatusFilter[]));
+
   const [subcommitteeFilters, setSubcommitteeFilters] = useState(() => {
     const subcommittees = (router.query.subcommittees || '').toString();
 
@@ -82,6 +89,11 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions: rawSubm
             return acc;
           }
         }
+
+        const showAccepted = visibleStatuses.indexOf('accepted') !== -1;
+        const showBackup = visibleStatuses.indexOf('backup') !== -1;
+        const showPending = visibleStatuses.indexOf('pending') !== -1;
+        const showDeclined = visibleStatuses.indexOf('declined') !== -1;
 
         const validCategories: GameSubmissionCategory[] = item.categories.filter(category => {
           switch (category.runStatus) {
@@ -113,7 +125,7 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions: rawSubm
 
         return acc;
       }, [] as SubmissionWithCategoriesAndUsername[] | CommitteeVisibleSubmission[]);
-  }, [filterValue, submissions, showFilters, showAccepted, showBackup, showPending, showDeclined, isCommitteeMember, subcommitteeFilters]);
+  }, [filterValue, submissions, showFilters, visibleStatuses, isCommitteeMember, subcommitteeFilters]);
 
   const allCategoryCount = useMemo(() => getCategoryCount(submissions), [submissions]);
   const filteredCategoryCount = useMemo(() => getCategoryCount(filteredSubmissions), [filteredSubmissions]);
@@ -136,6 +148,16 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions: rawSubm
     label,
   })), [event.genres]);
 
+  const updateStatusQueryParams = useCallback((values: StatusFilter[]) => {
+    const query = STATUS_FILTERS.reduce((acc, filter) => ({
+      ...acc,
+      [filter]: values.indexOf(filter) !== -1,
+    }), { ...router.query } as ParsedUrlQueryInput);
+
+    router.replace({ query });
+    setVisibleStatuses(values);
+  }, [router]);
+
   const handleUpdateFilterValue = useCallback((evt: React.ChangeEvent<HTMLInputElement>) => {
     setFilterValue(evt.target.value);
     router.replace({
@@ -143,33 +165,31 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions: rawSubm
     });
   }, [router]);
 
-  const handleToggleShowAccepted = useCallback(() => {
-    setShowAccepted(!showAccepted);
-    router.replace({
-      query: { ...router.query, accepted: !showAccepted },
-    });
-  }, [showAccepted, router]);
+  const handleToggleStatus = useCallback((status: StatusFilter, forceOnly: boolean) => {
+    if (forceOnly) {
+      updateStatusQueryParams([status]);
+    } else if (visibleStatuses.indexOf(status) === -1) {
+      updateStatusQueryParams([...visibleStatuses, status]);
+    } else {
+      updateStatusQueryParams(visibleStatuses.filter(x => x !== status));
+    }
+  }, [updateStatusQueryParams, visibleStatuses]);
 
-  const handleToggleShowBackup = useCallback(() => {
-    setShowBackup(!showBackup);
-    router.replace({
-      query: { ...router.query, backup: !showBackup },
-    });
-  }, [showBackup, router]);
+  const handleToggleShowAccepted = useCallback((mouseEvent: React.MouseEvent<HTMLButtonElement>) => {
+    handleToggleStatus('accepted', mouseEvent.shiftKey);
+  }, [handleToggleStatus]);
 
-  const handleToggleShowDeclined = useCallback(() => {
-    setShowDeclined(!showDeclined);
-    router.replace({
-      query: { ...router.query, declined: !showDeclined },
-    });
-  }, [showDeclined, router]);
+  const handleToggleShowBackup = useCallback((mouseEvent: React.MouseEvent<HTMLButtonElement>) => {
+    handleToggleStatus('backup', mouseEvent.shiftKey);
+  }, [handleToggleStatus]);
 
-  const handleToggleShowPending = useCallback(() => {
-    setShowPending(!showPending);
-    router.replace({
-      query: { ...router.query, pending: !showPending },
-    });
-  }, [showPending, router]);
+  const handleToggleShowDeclined = useCallback((mouseEvent: React.MouseEvent<HTMLButtonElement>) => {
+    handleToggleStatus('declined', mouseEvent.shiftKey);
+  }, [handleToggleStatus]);
+
+  const handleToggleShowPending = useCallback((mouseEvent: React.MouseEvent<HTMLButtonElement>) => {
+    handleToggleStatus('pending', mouseEvent.shiftKey);
+  }, [handleToggleStatus]);
 
   const handleChangeSubcommitteeFilters = useCallback((values: readonly { value: string; label: string; }[]) => {
     const subcommitteeNames = values.map(({ value }) => value);
@@ -258,21 +278,21 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions: rawSubm
                 <StatusFilter
                   activeColor={SiteConfig.colors.status.accepted}
                   onClick={handleToggleShowAccepted}
-                  active={showAccepted}
+                  active={visibleStatuses.indexOf('accepted') !== -1}
                 >
                   Accepted
                 </StatusFilter>
                 <StatusFilter
                   activeColor={SiteConfig.colors.status.backup}
                   onClick={handleToggleShowBackup}
-                  active={showBackup}
+                  active={visibleStatuses.indexOf('backup') !== -1}
                 >
                   Backup
                 </StatusFilter>
                 <StatusFilter
                   activeColor={SiteConfig.colors.status.declined}
                   onClick={handleToggleShowDeclined}
-                  active={showDeclined}
+                  active={visibleStatuses.indexOf('declined') !== -1}
                 >
                   Declined
                 </StatusFilter>
@@ -280,7 +300,7 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions: rawSubm
                   <StatusFilter
                     activeColor={SiteConfig.colors.accents.linkDark}
                     onClick={handleToggleShowPending}
-                    active={showPending}
+                    active={visibleStatuses.indexOf('pending') !== -1}
                   >
                     Pending
                   </StatusFilter>
