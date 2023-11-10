@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Event } from '@prisma/client';
-import { compareAsc, intlFormat, intlFormatDistance, isBefore } from 'date-fns';
+import { compareDesc, intlFormat, intlFormatDistance, isBefore } from 'date-fns';
 import { utcToZonedTime } from 'date-fns-tz';
 import { Alert } from './layout';
 import { areSubmissionsOpen, forceAsDate, isAfterSubmissionPeriod, isBeforeSubmissionPeriod } from '../utils/eventHelpers';
@@ -37,7 +37,7 @@ export function getEventSubmissionTimeString(event: Event, includeAbsoluteDate =
 }
 
 function sortEventList(list: Event[]): Event[] {
-  return list.sort((a, b) => compareAsc(forceAsDate(a.eventStart), forceAsDate(b.eventStart)));
+  return list.sort((a, b) => compareDesc(forceAsDate(a.eventStart), forceAsDate(b.eventStart)));
 }
 
 interface EventItemProps {

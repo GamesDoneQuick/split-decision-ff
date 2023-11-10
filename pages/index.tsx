@@ -47,7 +47,7 @@ const Container = styled.div`
   display: flex;
   max-height: 100%;
   flex-direction: row;
-  overflow-y: hidden;
+  overflow-y: auto;
   color: #fff;
 
   @media screen and (max-width: 500px) {
