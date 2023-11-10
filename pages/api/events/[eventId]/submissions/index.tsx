@@ -56,7 +56,7 @@ export default async function handle(req: Request, res: Response) {
           return res.status(400).json({ message: 'This submission no longer exists; please refresh the page and try again.' });
         }
 
-        if (!userMatchesOrIsCommittee(session, existingRecord.id, event)) {
+        if (!userMatchesOrIsCommittee(session, existingRecord.userId, event)) {
           return res.status(401).json({ message: 'You do not have access to this submission.' });
         }
 
