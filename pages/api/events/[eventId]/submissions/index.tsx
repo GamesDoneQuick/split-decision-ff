@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 // eslint-disable-next-line camelcase
 import { unstable_getServerSession } from 'next-auth';
+import { GameSubmissionCategory } from '@prisma/client';
 import { prisma } from '../../../../../utils/db';
 import { areSubmissionsOpen, isCommitteeOrAdmin, userMatchesOrIsCommittee } from '../../../../../utils/eventHelpers';
 import { fetchEventWithCommitteeMemberIdsAndNames } from '../../../../../utils/dbHelpers';
@@ -84,50 +85,75 @@ export default async function handle(req: Request, res: Response) {
         flashingLights: req.body.flashingLights,
         technicalNotes: req.body.technicalNotes,
         contentWarning: req.body.contentWarning,
-        categories: req.body.categories.map((category: Record<string, unknown>) => ({
-          categoryName: category.categoryName,
-          videoURL: category.videoURL,
-          estimate: category.estimate,
-          description: category.description,
-          isCoop: category.isCoop,
-        })),
         soloCommentary: req.body.soloCommentary,
       };
 
-      if (editableData.categories.length > event.maxCategories) {
+      const categoryData = req.body.categories.map((category: Record<string, unknown>) => ({
+        id: category.id,
+        categoryName: category.categoryName,
+        videoURL: category.videoURL,
+        estimate: category.estimate,
+        description: category.description,
+        isCoop: category.isCoop,
+      }));
+
+      if (categoryData.length > event.maxCategories) {
         return res.status(400).json({ message: `You cannot submit more than ${event.maxCategories} ${event.maxCategories === 1 ? 'category' : 'categories'} to this event.` });
       }
 
-      if (editableData.categories.length === 0) {
+      if (categoryData.length === 0) {
         return res.status(400).json({ message: 'You must submit at least one category.' });
+      }
+
+      // eslint-disable-next-line no-restricted-syntax
+      if (req.body.categories.some((category: GameSubmissionCategory) => category.id && existingCategoryIds.indexOf(category.id) === -1)) {
+        return res.status(401).json({ message: 'You do not have access to this category.' });
       }
 
       const validation = ValidationSchemas.GameSubmission.validate(editableData);
 
       if (validation.error) return res.status(400).json({ message: validation.error.message });
 
-      const result = await prisma.gameSubmission.upsert({
-        where: {
-          id: req.body.id ?? '',
-        },
-        update: {
-          ...editableData,
-          categories: {
-            deleteMany: { id: { in: existingCategoryIds } },
-            createMany: { data: editableData.categories },
+      const deletedCategoryIds = existingCategoryIds.filter(id => !categoryData.some((category: GameSubmissionCategory) => category.id === id));
+
+      const result = await prisma.$transaction(async tx => {
+        const submission = await tx.gameSubmission.upsert({
+          where: {
+            id: req.body.id ?? '',
           },
-        },
-        create: {
-          ...editableData,
-          eventId: event.id,
-          userId: user.id,
-          categories: {
-            createMany: { data: editableData.categories },
+          update: editableData,
+          create: {
+            ...editableData,
+            eventId: event.id,
+            userId: user.id,
           },
-        },
-        include: {
-          categories: true,
-        },
+        });
+        
+        await tx.gameSubmissionCategory.deleteMany({
+          where: {
+            id: {
+              in: deletedCategoryIds,
+            },
+          },
+        });
+
+        const categories = await Promise.all((categoryData as GameSubmissionCategory[]).map(category => (
+          tx.gameSubmissionCategory.upsert({
+            where: {
+              id: category.id ?? '',
+            },
+            update: category,
+            create: {
+              ...category,
+              gameSubmissionId: submission.id,
+            },
+          })
+        )));
+
+        return {
+          ...submission,
+          categories,
+        };
       });
 
       if (session.user.id !== user.id) {
