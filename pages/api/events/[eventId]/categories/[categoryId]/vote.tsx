@@ -33,7 +33,11 @@ export default async function handle(req: Request, res: Response) {
           gameSubmission: {
             include: {
               user: true,
-              incentives: true,
+              incentives: {
+                include: {
+                  attachedCategories: true,
+                },
+              },
             },
           },
         },
@@ -65,6 +69,9 @@ export default async function handle(req: Request, res: Response) {
         return res.status(400).json({ message: `There is no thread that matches the genre ${category.gameSubmission.primaryGenre} - this is a Discord configuration error.` });
       }
 
+      const incentiveCount = category.gameSubmission.incentives
+        .filter(incentive => incentive.attachedCategories.some(attached => attached.categoryId === category.id));
+
       const embed = new EmbedBuilder()
         .setColor('#4C3973')
         .setAuthor({ name: 'Committee Vote' })
@@ -76,7 +83,7 @@ export default async function handle(req: Request, res: Response) {
           { name: 'Duration', value: category.estimate, inline: true },
           // { name: 'Solo Commentary', value: category.gameSubmission.soloCommentary ? 'Yes' : 'No', inline: true },
           { name: 'Co-op/Race', value: category.isCoop ? 'Yes' : 'No', inline: true },
-          { name: 'Incentives', value: category.gameSubmission.incentives.length.toString(), inline: true },
+          { name: 'Incentives', value: incentiveCount.toString(), inline: true },
         );
     
       const message = await matchingThread.send({ embeds: [embed] });
