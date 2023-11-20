@@ -70,7 +70,8 @@ export default async function handle(req: Request, res: Response) {
       }
 
       const incentiveCount = category.gameSubmission.incentives
-        .filter(incentive => incentive.attachedCategories.some(attached => attached.categoryId === category.id));
+        .filter(incentive => incentive.attachedCategories.some(attached => attached.categoryId === category.id))
+        .length;
 
       const embed = new EmbedBuilder()
         .setColor('#4C3973')
