@@ -14,13 +14,27 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ profile }) {
+    async signIn({ profile, user }) {
       if (!process.env.DISCORD_SERVER_ID) return true;
       
       try {
         const guild = await DiscordClient.guilds.fetch(process.env.DISCORD_SERVER_ID);
 
-        if (guild && await guild.members.fetch(profile.id as string)) return true;
+        if (guild && await guild.members.fetch(profile.id as string)) {
+          // Check to see if the user's name has updated, and if it has, update it.
+          if (profile.username !== null && user.name !== profile.username) {
+            await prisma.user.update({
+              where: {
+                id: user.id,
+              },
+              data: {
+                name: profile.username,
+              },
+            });
+          }
+
+          return true;
+        }
       } catch (e) {
         console.error('Error checking Discord server membership; is the server ID valid?');
         console.error(e);
