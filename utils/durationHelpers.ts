@@ -77,3 +77,13 @@ export function availabilitySlotsToSegments(availability: EventAvailability) {
     };
   });
 }
+
+const NO_HOURS_TIMESTAMP_REGEX = /^(?:([0-5]\d):)?([0-5]\d)$/;
+const SINGLE_DIGIT_HOUR_TIMESTAMP_REGEX = /^(?:(?:([0-9]):)([0-5]\d):)?([0-5]\d)$/;
+
+export function normalizeEstimate(estimate: string): string {
+  if (estimate.match(SINGLE_DIGIT_HOUR_TIMESTAMP_REGEX)) return `0${estimate}`;
+  if (estimate.match(NO_HOURS_TIMESTAMP_REGEX)) return `00:${estimate}`;
+
+  return estimate;
+}

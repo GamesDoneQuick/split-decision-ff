@@ -242,7 +242,12 @@ const EventDetails: NextPage<EventDetailsProps> = ({ event, submissions: rawSubm
               <CommitteeMemberTools>
                 <EventLink href={`/api/events/${event.id}/download`} target="_blank" rel="noopener noreferrer">
                   <EventAction>
-                    Export CSV
+                    Export Run CSV
+                  </EventAction>
+                </EventLink>
+                <EventLink href={`/api/events/${event.id}/incentives/download`} target="_blank" rel="noopener noreferrer">
+                  <EventAction>
+                    Export Incentive CSV
                   </EventAction>
                 </EventLink>
               </CommitteeMemberTools>
@@ -441,6 +446,10 @@ const SubmissionTotal = styled.div`
 
 const CommitteeMemberTools = styled.div`
   margin-left: auto;
+
+  & a + a {
+    margin-left: 0.5rem;
+  }
 `;
 
 const EventAction = styled(Button)`

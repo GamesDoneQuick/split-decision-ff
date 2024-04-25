@@ -7,7 +7,7 @@ import { prisma } from '../../../../utils/db';
 import { authOptions } from '../../auth/[...nextauth]';
 import { isMemberOfCommittee } from '../../../../utils/eventHelpers';
 import { handleAPIRoute } from '../../../../utils/apiUtils';
-import { availabilitySlotsToSegments } from '../../../../utils/durationHelpers';
+import { availabilitySlotsToSegments, normalizeEstimate } from '../../../../utils/durationHelpers';
 
 interface ExportedSubmissionRow {
   userName: string;
@@ -62,16 +62,6 @@ const EXPORTED_SUBMISSION_FIELDS: [keyof ExportedSubmissionRow, string][] = [
   ['categoryDescription', 'Category Description'],
   ['isCoop', 'Co-op/Race'],
 ];
-
-const NO_HOURS_TIMESTAMP_REGEX = /^(?:([0-5]\d):)?([0-5]\d)$/;
-const SINGLE_DIGIT_HOUR_TIMESTAMP_REGEX = /^(?:(?:([0-9]):)([0-5]\d):)?([0-5]\d)$/;
-
-function normalizeEstimate(estimate: string): string {
-  if (estimate.match(SINGLE_DIGIT_HOUR_TIMESTAMP_REGEX)) return `0${estimate}`;
-  if (estimate.match(NO_HOURS_TIMESTAMP_REGEX)) return `00:${estimate}`;
-
-  return estimate;
-}
 
 export default async function handle(req: Request, res: Response) {
   await handleAPIRoute(req, res, {
