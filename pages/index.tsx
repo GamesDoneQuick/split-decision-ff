@@ -18,7 +18,7 @@ const Home: NextPage = () => (
       <a href="https://submissions.gamesdonequick.com">go here</a>
     </BigMessage>
     <SmallMessage>
-      your old submissions are in the top left corner btw
+      your old submissions are in the top right corner btw
     </SmallMessage>
   </Container>
 );
