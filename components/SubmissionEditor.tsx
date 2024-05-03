@@ -107,7 +107,7 @@ export const SubmissionEditor: React.FC<SubmissionEditorProps> = ({ event: event
     if (response) onSave(response);
   }, [save, validatedSubmission.value, user.id, onSave]);
 
-  const remainingCategories = eventRecord.maxSubmissions - validatedSubmission.value.categories.length;
+  const remainingCategories = eventRecord.maxCategories - validatedSubmission.value.categories.length;
 
   if (session.status !== 'authenticated') return null;
 
